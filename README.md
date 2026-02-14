@@ -1,5 +1,7 @@
 # Matchpoint
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-matchpoint-3F6F5E?logo=github)](https://github.com/sanchishah/matchpoint)
+
 **Where players meet their match.**
 
 Matchpoint is an elegant pickleball player matching platform for the South Bay Area. The Matchpoint team pre-books court slots at clubs, publishes them as inventory, and players join to get matched. When enough players join, the game is confirmed and payments are charged.
