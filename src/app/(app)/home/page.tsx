@@ -8,7 +8,7 @@ const features = [
     icon: Target,
     title: "Skill-Based Matchmaking",
     desc: "Connect with players near you based on level, age, and play style.",
-    image: "https://images.unsplash.com/photo-1747027694225-cbf12dd20826?w=600&h=400&fit=crop",
+    image: "https://plus.unsplash.com/premium_photo-1749494936171-dc8766542318?w=600&h=400&fit=crop",
   },
   {
     icon: MapPin,
@@ -20,13 +20,13 @@ const features = [
     icon: MessageCircle,
     title: "Game Coordination",
     desc: "Built-in group chats open before every match.",
-    image: "https://images.unsplash.com/photo-1643581278970-413ac3900826?w=600&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1737477001013-39d4a141e746?w=600&h=400&fit=crop",
   },
   {
     icon: CreditCard,
     title: "Easy Payments",
     desc: "Only pay your share for the court. Apple Pay, PayPal, or card.",
-    image: "https://images.unsplash.com/photo-1768879045902-6412996b9d51?w=600&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1693142519367-e8eb86d2bb08?w=600&h=400&fit=crop",
   },
   {
     icon: Star,
@@ -210,7 +210,7 @@ export default function HomePage() {
       {/* Contact CTA */}
       <section className="relative py-16 bg-[#0F1923] overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1567684935919-81c216847116?w=1920&h=600&fit=crop"
+          src="https://images.unsplash.com/photo-1761644310400-fe763d140148?w=1920&h=600&fit=crop"
           alt=""
           fill
           className="object-cover opacity-15"
