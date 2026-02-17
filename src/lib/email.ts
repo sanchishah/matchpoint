@@ -139,12 +139,12 @@ export function gameConfirmedEmail(playerName: string, clubName: string, dateStr
     subject: "Your game is confirmed!",
     html: `
       <div style="font-family: 'Inter', sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="font-family: 'Georgia', serif; color: #3F6F5E; font-size: 24px;">Game Confirmed</h1>
-        <p style="color: #4A4A4A;">Hi ${playerName},</p>
-        <p style="color: #4A4A4A;">Great news! Your game at <strong>${clubName}</strong> on <strong>${dateStr}</strong> is confirmed.</p>
-        <p style="color: #4A4A4A;">Your share: <strong>${amount}</strong> has been charged.</p>
-        <p style="color: #4A4A4A;">Chat opens 15 minutes before your game. See you on the court!</p>
-        <p style="color: #717171; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <h1 style="font-family: 'Georgia', serif; color: #0B4F6C; font-size: 24px;">Game Confirmed</h1>
+        <p style="color: #333333;">Hi ${playerName},</p>
+        <p style="color: #333333;">Great news! Your game at <strong>${clubName}</strong> on <strong>${dateStr}</strong> is confirmed.</p>
+        <p style="color: #333333;">Your share: <strong>${amount}</strong> has been charged.</p>
+        <p style="color: #333333;">Chat opens 15 minutes before your game. See you on the court!</p>
+        <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
       </div>
     `,
   };
@@ -155,11 +155,11 @@ export function spotReservedEmail(playerName: string, clubName: string, dateStr:
     subject: "Spot reserved — waiting for players",
     html: `
       <div style="font-family: 'Inter', sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="font-family: 'Georgia', serif; color: #3F6F5E; font-size: 24px;">Spot Reserved</h1>
-        <p style="color: #4A4A4A;">Hi ${playerName},</p>
-        <p style="color: #4A4A4A;">You've reserved a spot at <strong>${clubName}</strong> on <strong>${dateStr}</strong>.</p>
-        <p style="color: #4A4A4A;">We're waiting for more players to fill the game. You'll only be charged once confirmed.</p>
-        <p style="color: #717171; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <h1 style="font-family: 'Georgia', serif; color: #0B4F6C; font-size: 24px;">Spot Reserved</h1>
+        <p style="color: #333333;">Hi ${playerName},</p>
+        <p style="color: #333333;">You've reserved a spot at <strong>${clubName}</strong> on <strong>${dateStr}</strong>.</p>
+        <p style="color: #333333;">We're waiting for more players to fill the game. You'll only be charged once confirmed.</p>
+        <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
       </div>
     `,
   };
@@ -170,11 +170,11 @@ export function reminderEmail(playerName: string, clubName: string, dateStr: str
     subject: `Reminder: Game in ${hoursUntil} hours`,
     html: `
       <div style="font-family: 'Inter', sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="font-family: 'Georgia', serif; color: #3F6F5E; font-size: 24px;">Game Reminder</h1>
-        <p style="color: #4A4A4A;">Hi ${playerName},</p>
-        <p style="color: #4A4A4A;">Your game at <strong>${clubName}</strong> on <strong>${dateStr}</strong> starts in <strong>${hoursUntil} hours</strong>.</p>
-        <p style="color: #4A4A4A;">Get ready to play!</p>
-        <p style="color: #717171; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <h1 style="font-family: 'Georgia', serif; color: #0B4F6C; font-size: 24px;">Game Reminder</h1>
+        <p style="color: #333333;">Hi ${playerName},</p>
+        <p style="color: #333333;">Your game at <strong>${clubName}</strong> on <strong>${dateStr}</strong> starts in <strong>${hoursUntil} hours</strong>.</p>
+        <p style="color: #333333;">Get ready to play!</p>
+        <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
       </div>
     `,
   };
@@ -185,10 +185,10 @@ export function chatOpenEmail(playerName: string, clubName: string) {
     subject: "Chat is now open for your game",
     html: `
       <div style="font-family: 'Inter', sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="font-family: 'Georgia', serif; color: #3F6F5E; font-size: 24px;">Chat Open</h1>
-        <p style="color: #4A4A4A;">Hi ${playerName},</p>
-        <p style="color: #4A4A4A;">The game chat for your match at <strong>${clubName}</strong> is now open. Coordinate with your fellow players!</p>
-        <p style="color: #717171; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <h1 style="font-family: 'Georgia', serif; color: #0B4F6C; font-size: 24px;">Chat Open</h1>
+        <p style="color: #333333;">Hi ${playerName},</p>
+        <p style="color: #333333;">The game chat for your match at <strong>${clubName}</strong> is now open. Coordinate with your fellow players!</p>
+        <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
       </div>
     `,
   };

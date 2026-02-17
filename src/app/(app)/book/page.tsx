@@ -160,10 +160,10 @@ export default function BookPage() {
   return (
     <div className="py-12">
       <div className="mx-auto max-w-6xl px-6">
-        <h1 className="font-[family-name:var(--font-playfair)] text-3xl md:text-4xl text-[#2A2A2A] mb-3 tracking-wide">
+        <h1 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#0A0A0A] mb-3 tracking-wide">
           Reserve Your Court & Rally!
         </h1>
-        <p className="text-[#717171] mb-8 max-w-xl">
+        <p className="text-[#64748B] mb-8 max-w-xl">
           Browse available courts in the South Bay. You&apos;re only charged when a game is confirmed.
         </p>
 
@@ -171,25 +171,25 @@ export default function BookPage() {
         <div className="mb-8">
           <Button
             variant="outline"
-            className="border-[#F1F1F1] text-[#4A4A4A] rounded-full mb-4 md:hidden"
+            className="border-[#E2E8F0] text-[#333333] rounded-full mb-4 md:hidden"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="w-4 h-4 mr-2" /> Filters
           </Button>
           <div className={`grid grid-cols-1 md:grid-cols-5 gap-4 ${showFilters ? "" : "hidden md:grid"}`}>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-1.5 block">Zip Code</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Zip Code</Label>
               <Input
                 placeholder="e.g. 95014"
                 value={zip}
                 onChange={(e) => setZip(e.target.value)}
-                className="border-[#F1F1F1] rounded-xl h-11"
+                className="border-[#E2E8F0] rounded-xl h-11"
               />
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-1.5 block">Radius</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Radius</Label>
               <Select value={radius} onValueChange={setRadius}>
-                <SelectTrigger className="border-[#F1F1F1] rounded-xl h-11">
+                <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -200,18 +200,18 @@ export default function BookPage() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-1.5 block">Date</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Date</Label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="border-[#F1F1F1] rounded-xl h-11"
+                className="border-[#E2E8F0] rounded-xl h-11"
               />
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-1.5 block">Skill Level</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Skill Level</Label>
               <Select value={skillFilter} onValueChange={setSkillFilter}>
-                <SelectTrigger className="border-[#F1F1F1] rounded-xl h-11">
+                <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,9 +225,9 @@ export default function BookPage() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-1.5 block">Age Bracket</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Age Bracket</Label>
               <Select value={ageFilter} onValueChange={setAgeFilter}>
-                <SelectTrigger className="border-[#F1F1F1] rounded-xl h-11">
+                <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,7 +244,7 @@ export default function BookPage() {
           <div className="flex justify-end mt-3">
             <Button
               onClick={fetchSlots}
-              className="bg-[#3F6F5E] hover:bg-[#345C4E] text-white rounded-full px-6"
+              className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full px-6"
             >
               Search
             </Button>
@@ -253,11 +253,11 @@ export default function BookPage() {
 
         {/* Slots Grid */}
         {loading ? (
-          <div className="text-center py-20 text-[#717171]">Loading available courts...</div>
+          <div className="text-center py-20 text-[#64748B]">Loading available courts...</div>
         ) : sortedSlots.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-[#717171] mb-4">No slots match your filters.</p>
-            <p className="text-sm text-[#717171]">
+            <p className="text-[#64748B] mb-4">No slots match your filters.</p>
+            <p className="text-sm text-[#64748B]">
               Try expanding your radius or changing your preferences.
             </p>
           </div>
@@ -266,90 +266,90 @@ export default function BookPage() {
             {sortedSlots.map((slot) => (
               <Card
                 key={slot.id}
-                className="border-[#F1F1F1] rounded-2xl p-6 hover:shadow-md transition-shadow"
+                className="border-[#E2E8F0] rounded-xl p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-[family-name:var(--font-playfair)] text-lg text-[#2A2A2A]">
+                    <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A]">
                       {slot.club.name}
                     </h3>
-                    <p className="text-sm text-[#717171] flex items-center gap-1 mt-1">
+                    <p className="text-sm text-[#64748B] flex items-center gap-1 mt-1">
                       <MapPin className="w-3.5 h-3.5" /> {slot.club.city}
                     </p>
                   </div>
                   <button
                     onClick={() => toggleFavorite(slot.club.id)}
-                    className="p-1.5 hover:bg-[#DDEFE6] rounded-full transition-colors"
+                    className="p-1.5 hover:bg-[#E8F4F8] rounded-full transition-colors"
                   >
                     <Heart
                       className={`w-5 h-5 ${
                         favorites.includes(slot.club.id)
-                          ? "fill-[#3F6F5E] text-[#3F6F5E]"
-                          : "text-[#717171]"
+                          ? "fill-[#0B4F6C] text-[#0B4F6C]"
+                          : "text-[#64748B]"
                       }`}
                       strokeWidth={1.5}
                     />
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-[#4A4A4A] mb-3">
-                  <Clock className="w-4 h-4 text-[#3F6F5E]" />
+                <div className="flex items-center gap-2 text-sm text-[#333333] mb-3">
+                  <Clock className="w-4 h-4 text-[#0B4F6C]" />
                   {format(new Date(slot.startTime), "EEE, MMM d · h:mm a")}
-                  <span className="text-[#717171]">({slot.durationMins}min)</span>
+                  <span className="text-[#64748B]">({slot.durationMins}min)</span>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="secondary" className="bg-[#DDEFE6] text-[#3F6F5E] border-0 rounded-full text-xs">
+                  <Badge variant="secondary" className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full text-xs">
                     {slot.format === "SINGLES" ? "Singles" : "Doubles"}
                   </Badge>
-                  <Badge variant="secondary" className="bg-[#E6F0F6] text-[#3F6F5E] border-0 rounded-full text-xs">
+                  <Badge variant="secondary" className="bg-[#F1F5F9] text-[#0B4F6C] border-0 rounded-full text-xs">
                     Lvl {slot.skillLevel} · {skillLabel(slot.skillLevel)}
                   </Badge>
-                  <Badge variant="secondary" className="bg-[#F8F8F8] text-[#4A4A4A] border-0 rounded-full text-xs">
+                  <Badge variant="secondary" className="bg-[#F8F8F8] text-[#333333] border-0 rounded-full text-xs">
                     {ageLabel(slot.ageBracket)}
                   </Badge>
                 </div>
 
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xl font-medium text-[#2A2A2A]">
+                  <span className="text-xl font-medium text-[#0A0A0A]">
                     ${(slot.perPersonCents / 100).toFixed(2)}
-                    <span className="text-sm text-[#717171] font-normal"> /person</span>
+                    <span className="text-sm text-[#64748B] font-normal"> /person</span>
                   </span>
-                  <span className="text-sm text-[#717171] flex items-center gap-1">
+                  <span className="text-sm text-[#64748B] flex items-center gap-1">
                     <Users className="w-4 h-4" />
                     {slot.joinedCount}/{slot.requiredPlayers}
                   </span>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-1.5 bg-[#F1F1F1] rounded-full mb-4">
+                <div className="w-full h-1.5 bg-[#E2E8F0] rounded-full mb-4">
                   <div
-                    className="h-full bg-[#3F6F5E] rounded-full transition-all"
+                    className="h-full bg-[#0B4F6C] rounded-full transition-all"
                     style={{ width: `${(slot.joinedCount / slot.requiredPlayers) * 100}%` }}
                   />
                 </div>
 
                 {slot.userJoined ? (
                   <div className="flex gap-2">
-                    <Badge className="bg-[#DDEFE6] text-[#3F6F5E] border-0 rounded-full flex-1 justify-center py-2">
+                    <Badge className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full flex-1 justify-center py-2">
                       Reserved
                     </Badge>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-[#F1F1F1] text-[#717171] rounded-full text-xs"
+                      className="border-[#E2E8F0] text-[#64748B] rounded-full text-xs"
                       onClick={() => cancelSlot(slot.id)}
                     >
                       Cancel
                     </Button>
                   </div>
                 ) : slot.userWaitlisted ? (
-                  <Badge className="bg-[#E6F0F6] text-[#3F6F5E] border-0 rounded-full w-full justify-center py-2">
+                  <Badge className="bg-[#F1F5F9] text-[#0B4F6C] border-0 rounded-full w-full justify-center py-2">
                     On Waitlist
                   </Badge>
                 ) : slot.spotsLeft > 0 ? (
                   <Button
-                    className="w-full bg-[#3F6F5E] hover:bg-[#345C4E] text-white rounded-full"
+                    className="w-full bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full"
                     onClick={() => joinSlot(slot.id)}
                     disabled={joining === slot.id}
                   >
@@ -358,7 +358,7 @@ export default function BookPage() {
                 ) : (
                   <Button
                     variant="outline"
-                    className="w-full border-[#3F6F5E] text-[#3F6F5E] rounded-full"
+                    className="w-full border-[#0B4F6C] text-[#0B4F6C] rounded-full"
                     onClick={() => joinSlot(slot.id)}
                     disabled={joining === slot.id}
                   >
@@ -370,7 +370,7 @@ export default function BookPage() {
           </div>
         )}
 
-        <p className="text-center text-xs text-[#717171] mt-10 max-w-lg mx-auto">
+        <p className="text-center text-xs text-[#64748B] mt-10 max-w-lg mx-auto">
           Slots are only confirmed when all required players are found (2 for singles, 4 for doubles).
           You&apos;re only charged when confirmed.
         </p>

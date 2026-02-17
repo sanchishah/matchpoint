@@ -82,52 +82,52 @@ export default function AdminSlotsPage() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case "OPEN": return "bg-[#E6F0F6] text-[#3F6F5E]";
+      case "OPEN": return "bg-[#F1F5F9] text-[#0B4F6C]";
       case "PENDING_FILL": return "bg-yellow-50 text-yellow-700";
-      case "CONFIRMED": return "bg-[#DDEFE6] text-[#3F6F5E]";
+      case "CONFIRMED": return "bg-[#E8F4F8] text-[#0B4F6C]";
       case "COMPLETED": return "bg-gray-100 text-gray-600";
       case "CANCELLED": return "bg-red-50 text-red-600";
       default: return "bg-gray-100 text-gray-600";
     }
   };
 
-  if (loading) return <p className="text-[#717171]">Loading slots...</p>;
+  if (loading) return <p className="text-[#64748B]">Loading slots...</p>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A]">
+        <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A]">
           Slots ({slots.length})
         </h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#3F6F5E] text-white rounded-full" size="sm">
+            <Button className="bg-[#0B4F6C] text-white rounded-lg" size="sm">
               <Plus className="w-4 h-4 mr-1" /> Create Slot
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-[family-name:var(--font-playfair)]">Create Slot</DialogTitle>
+              <DialogTitle className="font-[family-name:var(--font-heading)]">Create Slot</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label className="text-xs uppercase tracking-wider text-[#717171]">Club</Label>
+                <Label className="text-xs uppercase tracking-wider text-[#64748B]">Club</Label>
                 <Select value={form.clubId} onValueChange={(v) => setForm({ ...form, clubId: v })}>
-                  <SelectTrigger className="border-[#F1F1F1] rounded-xl mt-1"><SelectValue placeholder="Select club" /></SelectTrigger>
+                  <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue placeholder="Select club" /></SelectTrigger>
                   <SelectContent>
                     {clubs.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-xs uppercase tracking-wider text-[#717171]">Start Time</Label>
-                <Input type="datetime-local" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="border-[#F1F1F1] rounded-xl mt-1" />
+                <Label className="text-xs uppercase tracking-wider text-[#64748B]">Start Time</Label>
+                <Input type="datetime-local" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="border-[#E2E8F0] rounded-xl mt-1" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs uppercase tracking-wider text-[#717171]">Duration</Label>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B]">Duration</Label>
                   <Select value={String(form.durationMins)} onValueChange={(v) => setForm({ ...form, durationMins: parseInt(v) })}>
-                    <SelectTrigger className="border-[#F1F1F1] rounded-xl mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="60">60 min</SelectItem>
                       <SelectItem value="120">120 min</SelectItem>
@@ -135,9 +135,9 @@ export default function AdminSlotsPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs uppercase tracking-wider text-[#717171]">Format</Label>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B]">Format</Label>
                   <Select value={form.format} onValueChange={(v) => setForm({ ...form, format: v })}>
-                    <SelectTrigger className="border-[#F1F1F1] rounded-xl mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="SINGLES">Singles (2)</SelectItem>
                       <SelectItem value="DOUBLES">Doubles (4)</SelectItem>
@@ -147,18 +147,18 @@ export default function AdminSlotsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs uppercase tracking-wider text-[#717171]">Skill Level</Label>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B]">Skill Level</Label>
                   <Select value={String(form.skillLevel)} onValueChange={(v) => setForm({ ...form, skillLevel: parseInt(v) })}>
-                    <SelectTrigger className="border-[#F1F1F1] rounded-xl mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {SKILL_LEVELS.map((s) => <SelectItem key={s.value} value={String(s.value)}>{s.value} — {s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs uppercase tracking-wider text-[#717171]">Age Bracket</Label>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B]">Age Bracket</Label>
                   <Select value={form.ageBracket} onValueChange={(v) => setForm({ ...form, ageBracket: v })}>
-                    <SelectTrigger className="border-[#F1F1F1] rounded-xl mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {AGE_BRACKETS.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
                     </SelectContent>
@@ -166,11 +166,11 @@ export default function AdminSlotsPage() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs uppercase tracking-wider text-[#717171]">Total Cost (cents)</Label>
-                <Input type="number" value={form.totalCostCents} onChange={(e) => setForm({ ...form, totalCostCents: parseInt(e.target.value) || 0 })} className="border-[#F1F1F1] rounded-xl mt-1" />
-                <p className="text-xs text-[#717171] mt-1">500 = $5.00, 1000 = $10.00</p>
+                <Label className="text-xs uppercase tracking-wider text-[#64748B]">Total Cost (cents)</Label>
+                <Input type="number" value={form.totalCostCents} onChange={(e) => setForm({ ...form, totalCostCents: parseInt(e.target.value) || 0 })} className="border-[#E2E8F0] rounded-xl mt-1" />
+                <p className="text-xs text-[#64748B] mt-1">500 = $5.00, 1000 = $10.00</p>
               </div>
-              <Button onClick={handleCreate} className="w-full bg-[#3F6F5E] text-white rounded-full">Create Slot</Button>
+              <Button onClick={handleCreate} className="w-full bg-[#0B4F6C] text-white rounded-lg">Create Slot</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -181,14 +181,14 @@ export default function AdminSlotsPage() {
           const joined = slot.participants.filter((p) => p.status === "JOINED").length;
           const waitlisted = slot.participants.filter((p) => p.status === "WAITLISTED").length;
           return (
-            <Card key={slot.id} className="border-[#F1F1F1] rounded-2xl p-5">
+            <Card key={slot.id} className="border-[#E2E8F0] rounded-xl p-5">
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-[#2A2A2A] font-medium">{slot.club.name}</h3>
+                    <h3 className="text-[#0A0A0A] font-medium">{slot.club.name}</h3>
                     <Badge className={`${statusColor(slot.status)} border-0 rounded-full text-xs`}>{slot.status}</Badge>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-[#717171]">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-[#64748B]">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {format(new Date(slot.startTime), "MMM d, h:mm a")}
@@ -201,7 +201,7 @@ export default function AdminSlotsPage() {
                   </div>
                 </div>
                 {!["COMPLETED", "CANCELLED"].includes(slot.status) && (
-                  <Button variant="outline" size="sm" className="rounded-full border-[#F1F1F1] text-red-500" onClick={() => cancelSlot(slot.id)}>
+                  <Button variant="outline" size="sm" className="rounded-lg border-[#E2E8F0] text-red-500" onClick={() => cancelSlot(slot.id)}>
                     <X className="w-3.5 h-3.5 mr-1" /> Cancel
                   </Button>
                 )}

@@ -45,32 +45,32 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (loading) return <p className="text-[#717171]">Loading users...</p>;
+  if (loading) return <p className="text-[#64748B]">Loading users...</p>;
 
   return (
     <div>
-      <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-6">
+      <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-6">
         Users ({users.length})
       </h2>
 
       <div className="space-y-3">
         {users.map((user) => (
-          <Card key={user.id} className="border-[#F1F1F1] rounded-2xl p-5">
+          <Card key={user.id} className="border-[#E2E8F0] rounded-xl p-5">
             <div className="flex justify-between items-center">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-[#2A2A2A] font-medium">
+                  <h3 className="text-[#0A0A0A] font-medium">
                     {user.profile?.name || user.name || "No name"}
                   </h3>
                   {user.role === "ADMIN" && (
-                    <Badge className="bg-[#3F6F5E] text-white border-0 rounded-full text-[10px]">Admin</Badge>
+                    <Badge className="bg-[#0B4F6C] text-white border-0 rounded-full text-[10px]">Admin</Badge>
                   )}
                   <Badge className={`border-0 rounded-full text-[10px] ${
-                    user.status === "ACTIVE" ? "bg-[#DDEFE6] text-[#3F6F5E]" : "bg-red-50 text-red-600"
+                    user.status === "ACTIVE" ? "bg-[#E8F4F8] text-[#0B4F6C]" : "bg-red-50 text-red-600"
                   }`}>{user.status}</Badge>
                 </div>
-                <p className="text-sm text-[#717171] mt-1">{user.email}</p>
-                <div className="flex gap-3 text-xs text-[#717171] mt-1">
+                <p className="text-sm text-[#64748B] mt-1">{user.email}</p>
+                <div className="flex gap-3 text-xs text-[#64748B] mt-1">
                   {user.profile && (
                     <>
                       <span>Skill: {user.profile.skillLevel}</span>
@@ -85,7 +85,7 @@ export default function AdminUsersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-full border-[#F1F1F1] text-red-500 text-xs"
+                    className="rounded-full border-[#E2E8F0] text-red-500 text-xs"
                     onClick={() => updateUser(user.id, { status: "RESTRICTED" })}
                   >
                     <ShieldOff className="w-3.5 h-3.5 mr-1" /> Restrict
@@ -94,7 +94,7 @@ export default function AdminUsersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-full border-[#F1F1F1] text-[#3F6F5E] text-xs"
+                    className="rounded-full border-[#E2E8F0] text-[#0B4F6C] text-xs"
                     onClick={() => updateUser(user.id, { status: "ACTIVE", clearStrikes: true })}
                   >
                     <Shield className="w-3.5 h-3.5 mr-1" /> Unrestrict

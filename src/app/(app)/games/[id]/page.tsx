@@ -150,7 +150,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   if (loading || !game) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#717171]">Loading game...</p>
+        <p className="text-[#64748B]">Loading game...</p>
       </div>
     );
   }
@@ -164,10 +164,10 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
       <div className="mx-auto max-w-5xl px-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl text-[#2A2A2A] mb-2 tracking-wide">
+          <h1 className="font-[family-name:var(--font-heading)] text-3xl text-[#0A0A0A] mb-2 tracking-wide">
             {game.slot.club.name}
           </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-[#717171]">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-[#64748B]">
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               {format(new Date(game.startTime), "EEEE, MMMM d, yyyy")}
@@ -182,16 +182,16 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
             </span>
           </div>
           <div className="flex gap-2 mt-3">
-            <Badge className="bg-[#DDEFE6] text-[#3F6F5E] border-0 rounded-full">
+            <Badge className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full">
               {game.slot.format === "SINGLES" ? "Singles" : "Doubles"}
             </Badge>
-            <Badge className="bg-[#E6F0F6] text-[#3F6F5E] border-0 rounded-full">
+            <Badge className="bg-[#F1F5F9] text-[#0B4F6C] border-0 rounded-full">
               Lvl {game.slot.skillLevel} · {skillLabel}
             </Badge>
             <Badge
               className={`border-0 rounded-full ${
-                game.status === "CONFIRMED" ? "bg-[#DDEFE6] text-[#3F6F5E]" :
-                game.status === "COMPLETED" ? "bg-[#E6F0F6] text-[#4A4A4A]" :
+                game.status === "CONFIRMED" ? "bg-[#E8F4F8] text-[#0B4F6C]" :
+                game.status === "COMPLETED" ? "bg-[#F1F5F9] text-[#333333]" :
                 "bg-red-50 text-red-600"
               }`}
             >
@@ -199,7 +199,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
             </Badge>
           </div>
           {game.payments.length > 0 && (
-            <p className="text-sm text-[#717171] mt-2">
+            <p className="text-sm text-[#64748B] mt-2">
               Your share: ${(game.payments[0].amountCents / 100).toFixed(2)} · {game.payments[0].status}
             </p>
           )}
@@ -208,9 +208,9 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Participants + Ratings */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="border-[#F1F1F1] rounded-2xl p-6">
-              <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#3F6F5E]" /> Players
+            <Card className="border-[#E2E8F0] rounded-xl p-6">
+              <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#0B4F6C]" /> Players
               </h2>
               <div className="space-y-4">
                 {game.participants.map((p) => {
@@ -221,14 +221,14 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                   return (
                     <div key={p.userId} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#DDEFE6] flex items-center justify-center text-sm font-medium text-[#3F6F5E]">
+                        <div className="w-9 h-9 rounded-full bg-[#E8F4F8] flex items-center justify-center text-sm font-medium text-[#0B4F6C]">
                           {playerName[0]}
                         </div>
                         <div>
-                          <p className="text-sm text-[#2A2A2A]">
-                            {playerName} {isMe && <span className="text-[#717171]">(you)</span>}
+                          <p className="text-sm text-[#0A0A0A]">
+                            {playerName} {isMe && <span className="text-[#64748B]">(you)</span>}
                           </p>
-                          <p className="text-xs text-[#717171]">
+                          <p className="text-xs text-[#64748B]">
                             Lvl {p.user.profile?.skillLevel || "?"}
                           </p>
                         </div>
@@ -237,14 +237,14 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                         <div>
                           {existingRating ? (
                             <div className="flex items-center gap-1">
-                              <Star className="w-3.5 h-3.5 fill-[#3F6F5E] text-[#3F6F5E]" />
-                              <span className="text-xs text-[#3F6F5E]">{existingRating.stars}</span>
+                              <Star className="w-3.5 h-3.5 fill-[#0B4F6C] text-[#0B4F6C]" />
+                              <span className="text-xs text-[#0B4F6C]">{existingRating.stars}</span>
                             </div>
                           ) : (
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-xs border-[#3F6F5E] text-[#3F6F5E] rounded-full h-7 px-3"
+                              className="text-xs border-[#0B4F6C] text-[#0B4F6C] rounded-full h-7 px-3"
                               onClick={() => {
                                 setShowRating(p.userId);
                                 setRatingStars(3);
@@ -265,13 +265,13 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
 
             {/* Rating Form */}
             {showRating && (
-              <Card className="border-[#F1F1F1] rounded-2xl p-6">
-                <h3 className="font-[family-name:var(--font-playfair)] text-lg text-[#2A2A2A] mb-4 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-[#3F6F5E]" /> Rate Player
+              <Card className="border-[#E2E8F0] rounded-xl p-6">
+                <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A] mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#0B4F6C]" /> Rate Player
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">Stars</Label>
+                    <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">Stars</Label>
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <button
@@ -282,8 +282,8 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                           <Star
                             className={`w-6 h-6 transition-colors ${
                               s <= ratingStars
-                                ? "fill-[#3F6F5E] text-[#3F6F5E]"
-                                : "text-[#F1F1F1]"
+                                ? "fill-[#0B4F6C] text-[#0B4F6C]"
+                                : "text-[#E2E8F0]"
                             }`}
                           />
                         </button>
@@ -291,7 +291,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
                   </div>
                   <div>
-                    <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">
+                    <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">
                       Felt like their level?
                     </Label>
                     <RadioGroup value={feltLevel} onValueChange={setFeltLevel} className="flex gap-3">
@@ -300,8 +300,8 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                           key={v}
                           className={`flex items-center gap-2 px-4 py-2 rounded-full border cursor-pointer transition-colors ${
                             feltLevel === v
-                              ? "border-[#3F6F5E] bg-[#DDEFE6] text-[#3F6F5E]"
-                              : "border-[#F1F1F1] text-[#717171]"
+                              ? "border-[#0B4F6C] bg-[#E8F4F8] text-[#0B4F6C]"
+                              : "border-[#E2E8F0] text-[#64748B]"
                           }`}
                         >
                           <RadioGroupItem value={v} className="sr-only" />
@@ -311,20 +311,20 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                     </RadioGroup>
                   </div>
                   <div>
-                    <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">
+                    <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">
                       Comment (optional)
                     </Label>
                     <Textarea
                       value={ratingComment}
                       onChange={(e) => setRatingComment(e.target.value)}
                       placeholder="How was the game?"
-                      className="border-[#F1F1F1] rounded-xl resize-none"
+                      className="border-[#E2E8F0] rounded-xl resize-none"
                       rows={2}
                     />
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      className="bg-[#3F6F5E] hover:bg-[#345C4E] text-white rounded-full flex-1"
+                      className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full flex-1"
                       onClick={() => submitRating(showRating)}
                       disabled={submittingRating}
                     >
@@ -332,7 +332,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-[#F1F1F1] rounded-full"
+                      className="border-[#E2E8F0] rounded-full"
                       onClick={() => setShowRating(null)}
                     >
                       Cancel
@@ -345,11 +345,11 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* Right: Chat */}
           <div className="lg:col-span-2">
-            <Card className="border-[#F1F1F1] rounded-2xl p-6 h-full flex flex-col">
-              <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-1 flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-[#3F6F5E]" /> Game Chat
+            <Card className="border-[#E2E8F0] rounded-xl p-6 h-full flex flex-col">
+              <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-1 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-[#0B4F6C]" /> Game Chat
               </h2>
-              <p className="text-xs text-[#717171] mb-4">
+              <p className="text-xs text-[#64748B] mb-4">
                 {game.chatOpen
                   ? "Chat is open"
                   : isPast
@@ -363,7 +363,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
               <div className="flex-1 min-h-[300px] max-h-[500px] overflow-y-auto space-y-3 mb-4">
                 {game.messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-[#717171] text-sm">
+                    <p className="text-[#64748B] text-sm">
                       {game.chatOpen ? "No messages yet. Say hello!" : "Chat will appear here."}
                     </p>
                   </div>
@@ -377,17 +377,17 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                         className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
+                          className={`max-w-[70%] rounded-xl px-4 py-2.5 ${
                             isMe
-                              ? "bg-[#3F6F5E] text-white"
-                              : "bg-[#F8F8F8] text-[#4A4A4A]"
+                              ? "bg-[#0B4F6C] text-white"
+                              : "bg-[#F8F8F8] text-[#333333]"
                           }`}
                         >
                           {!isMe && (
                             <p className="text-xs font-medium mb-0.5 opacity-70">{name}</p>
                           )}
                           <p className="text-sm">{msg.body}</p>
-                          <p className={`text-[10px] mt-1 ${isMe ? "text-white/60" : "text-[#717171]"}`}>
+                          <p className={`text-[10px] mt-1 ${isMe ? "text-white/60" : "text-[#64748B]"}`}>
                             {format(new Date(msg.createdAt), "h:mm a")}
                           </p>
                         </div>
@@ -405,11 +405,11 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type a message..."
-                    className="border-[#F1F1F1] rounded-full"
+                    className="border-[#E2E8F0] rounded-full"
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   />
                   <Button
-                    className="bg-[#3F6F5E] hover:bg-[#345C4E] text-white rounded-full px-4"
+                    className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full px-4"
                     onClick={sendMessage}
                     disabled={sending || !message.trim()}
                   >

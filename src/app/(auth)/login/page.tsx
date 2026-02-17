@@ -66,12 +66,12 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-[#F1F1F1] shadow-none">
+    <Card className="border-[#E2E8F0] shadow-none">
       <CardHeader className="pb-2 pt-8 px-8">
-        <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#4A4A4A] text-center">
+        <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-[#333333] text-center">
           Welcome Back
         </h2>
-        <p className="font-[family-name:var(--font-inter)] text-sm text-[#4A4A4A]/60 text-center mt-1">
+        <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60 text-center mt-1">
           Sign in to your account to continue
         </p>
       </CardHeader>
@@ -84,14 +84,14 @@ export default function LoginPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-[family-name:var(--font-inter)] text-[#4A4A4A] text-xs uppercase tracking-wider">
+                  <FormLabel className="font-[family-name:var(--font-inter)] text-[#333333] text-xs uppercase tracking-wider">
                     Email
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
-                      className="h-11 border-[#F1F1F1] bg-white font-[family-name:var(--font-inter)] text-[#4A4A4A] placeholder:text-[#4A4A4A]/30 focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20"
+                      className="h-11 border-[#E2E8F0] bg-white font-[family-name:var(--font-inter)] text-[#333333] placeholder:text-[#333333]/30 focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                       {...field}
                     />
                   </FormControl>
@@ -105,14 +105,14 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-[family-name:var(--font-inter)] text-[#4A4A4A] text-xs uppercase tracking-wider">
+                  <FormLabel className="font-[family-name:var(--font-inter)] text-[#333333] text-xs uppercase tracking-wider">
                     Password
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       placeholder="Your password"
-                      className="h-11 border-[#F1F1F1] bg-white font-[family-name:var(--font-inter)] text-[#4A4A4A] placeholder:text-[#4A4A4A]/30 focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20"
+                      className="h-11 border-[#E2E8F0] bg-white font-[family-name:var(--font-inter)] text-[#333333] placeholder:text-[#333333]/30 focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                       {...field}
                     />
                   </FormControl>
@@ -125,7 +125,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-full bg-[#3F6F5E] px-8 py-3 h-12 text-white font-[family-name:var(--font-inter)] text-sm tracking-wide hover:bg-[#3F6F5E]/90 transition-colors"
+                className="w-full rounded-lg bg-[#0B4F6C] px-8 py-3 h-12 text-white font-[family-name:var(--font-inter)] text-sm tracking-wide hover:bg-[#0B4F6C]/90 transition-colors"
               >
                 {isLoading ? (
                   <>
@@ -142,11 +142,11 @@ export default function LoginPage() {
       </CardContent>
 
       <CardFooter className="justify-center pb-8 px-8">
-        <p className="font-[family-name:var(--font-inter)] text-sm text-[#4A4A4A]/60">
+        <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="text-[#3F6F5E] font-medium hover:underline underline-offset-4"
+            className="text-[#0B4F6C] font-medium hover:underline underline-offset-4"
           >
             Sign up
           </Link>

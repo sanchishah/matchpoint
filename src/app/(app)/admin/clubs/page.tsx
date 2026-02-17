@@ -90,23 +90,23 @@ export default function AdminClubsPage() {
     setDialogOpen(true);
   };
 
-  if (loading) return <p className="text-[#717171]">Loading clubs...</p>;
+  if (loading) return <p className="text-[#64748B]">Loading clubs...</p>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A]">
+        <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A]">
           Clubs ({clubs.length})
         </h2>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-[#3F6F5E] text-white rounded-full" size="sm">
+            <Button className="bg-[#0B4F6C] text-white rounded-lg" size="sm">
               <Plus className="w-4 h-4 mr-1" /> Add Club
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-[family-name:var(--font-playfair)]">
+              <DialogTitle className="font-[family-name:var(--font-heading)]">
                 {editing ? "Edit Club" : "Add Club"}
               </DialogTitle>
             </DialogHeader>
@@ -121,16 +121,16 @@ export default function AdminClubsPage() {
                 { key: "notes", label: "Notes", type: "text" },
               ].map(({ key, label, type }) => (
                 <div key={key}>
-                  <Label className="text-xs uppercase tracking-wider text-[#717171]">{label}</Label>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B]">{label}</Label>
                   <Input
                     type={type}
                     value={(form as Record<string, string | number>)[key]}
                     onChange={(e) => setForm({ ...form, [key]: type === "number" ? parseFloat(e.target.value) || 0 : e.target.value })}
-                    className="border-[#F1F1F1] rounded-xl mt-1"
+                    className="border-[#E2E8F0] rounded-xl mt-1"
                   />
                 </div>
               ))}
-              <Button onClick={handleSubmit} className="w-full bg-[#3F6F5E] text-white rounded-full">
+              <Button onClick={handleSubmit} className="w-full bg-[#0B4F6C] text-white rounded-lg">
                 {editing ? "Update" : "Create"}
               </Button>
             </div>
@@ -140,21 +140,21 @@ export default function AdminClubsPage() {
 
       <div className="space-y-3">
         {clubs.map((club) => (
-          <Card key={club.id} className="border-[#F1F1F1] rounded-2xl p-5">
+          <Card key={club.id} className="border-[#E2E8F0] rounded-xl p-5">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-[#2A2A2A] font-medium">{club.name}</h3>
-                <p className="text-sm text-[#717171] flex items-center gap-1 mt-1">
+                <h3 className="text-[#0A0A0A] font-medium">{club.name}</h3>
+                <p className="text-sm text-[#64748B] flex items-center gap-1 mt-1">
                   <MapPin className="w-3.5 h-3.5" />
                   {club.address}, {club.city}, {club.state} {club.zip}
                 </p>
-                <p className="text-xs text-[#717171] mt-1">{club._count.slots} slots</p>
+                <p className="text-xs text-[#64748B] mt-1">{club._count.slots} slots</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="rounded-full border-[#F1F1F1]" onClick={() => openEdit(club)}>
+                <Button variant="outline" size="sm" className="rounded-lg border-[#E2E8F0]" onClick={() => openEdit(club)}>
                   <Pencil className="w-3.5 h-3.5" />
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-full border-[#F1F1F1] text-red-500" onClick={() => handleDelete(club.id)}>
+                <Button variant="outline" size="sm" className="rounded-lg border-[#E2E8F0] text-red-500" onClick={() => handleDelete(club.id)}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>

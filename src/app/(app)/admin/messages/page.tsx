@@ -10,29 +10,29 @@ export default async function AdminMessagesPage() {
 
   return (
     <div>
-      <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-6">
+      <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-6">
         Contact Messages ({messages.length})
       </h2>
 
       {messages.length === 0 ? (
         <div className="text-center py-16">
-          <Mail className="w-10 h-10 text-[#717171] mx-auto mb-3" />
-          <p className="text-[#717171]">No messages yet.</p>
+          <Mail className="w-10 h-10 text-[#64748B] mx-auto mb-3" />
+          <p className="text-[#64748B]">No messages yet.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {messages.map((msg) => (
-            <Card key={msg.id} className="border-[#F1F1F1] rounded-2xl p-6">
+            <Card key={msg.id} className="border-[#E2E8F0] rounded-xl p-6">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="text-[#2A2A2A] font-medium">{msg.name}</h3>
-                  <p className="text-sm text-[#717171]">{msg.email}</p>
+                  <h3 className="text-[#0A0A0A] font-medium">{msg.name}</h3>
+                  <p className="text-sm text-[#64748B]">{msg.email}</p>
                 </div>
-                <span className="text-xs text-[#717171]">
+                <span className="text-xs text-[#64748B]">
                   {format(msg.createdAt, "MMM d, yyyy 'at' h:mm a")}
                 </span>
               </div>
-              <p className="text-sm text-[#4A4A4A] leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-[#333333] leading-relaxed whitespace-pre-wrap">
                 {msg.message}
               </p>
             </Card>

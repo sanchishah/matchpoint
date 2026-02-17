@@ -51,49 +51,49 @@ export default function ContactPage() {
     <div className="py-16">
       <div className="mx-auto max-w-2xl px-6">
         <div className="text-center mb-12">
-          <div className="w-14 h-14 rounded-2xl bg-[#DDEFE6] flex items-center justify-center mx-auto mb-6">
-            <Mail className="w-7 h-7 text-[#3F6F5E]" />
+          <div className="w-14 h-14 rounded-xl bg-[#E8F4F8] flex items-center justify-center mx-auto mb-6">
+            <Mail className="w-7 h-7 text-[#0B4F6C]" />
           </div>
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl md:text-4xl text-[#2A2A2A] mb-4 tracking-wide">
+          <h1 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#0A0A0A] mb-4 tracking-wide">
             Questions? Feedback? Reach Out!
           </h1>
-          <p className="text-[#4A4A4A] max-w-md mx-auto leading-relaxed">
+          <p className="text-[#333333] max-w-md mx-auto leading-relaxed">
             We&apos;re always happy to hear from you. Whether it&apos;s about a court, a match, or your
             experience — drop us a message anytime.
           </p>
         </div>
 
-        <Card className="border-[#F1F1F1] rounded-2xl p-8">
+        <Card className="border-[#E2E8F0] rounded-xl p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">Name</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">Name</Label>
               <Input
                 {...register("name")}
                 placeholder="Your name"
-                className="border-[#F1F1F1] rounded-xl h-11"
+                className="border-[#E2E8F0] rounded-xl h-11"
               />
               {errors.name && (
                 <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
               )}
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">Email</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">Email</Label>
               <Input
                 {...register("email")}
                 type="email"
                 placeholder="your@email.com"
-                className="border-[#F1F1F1] rounded-xl h-11"
+                className="border-[#E2E8F0] rounded-xl h-11"
               />
               {errors.email && (
                 <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
               )}
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-wider text-[#717171] mb-2 block">Message</Label>
+              <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-2 block">Message</Label>
               <Textarea
                 {...register("message")}
                 placeholder="What's on your mind?"
-                className="border-[#F1F1F1] rounded-xl resize-none"
+                className="border-[#E2E8F0] rounded-xl resize-none"
                 rows={5}
               />
               {errors.message && (
@@ -103,7 +103,7 @@ export default function ContactPage() {
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#3F6F5E] hover:bg-[#345C4E] text-white rounded-full h-12 text-base"
+              className="w-full bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full h-12 text-base"
             >
               {submitting ? "Sending..." : "Send Message"}
             </Button>

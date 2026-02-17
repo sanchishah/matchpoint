@@ -88,24 +88,24 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-[#4A4A4A] hover:text-[#3F6F5E]"
+          className="relative h-9 w-9 text-[#333333] hover:text-[#0B4F6C]"
           aria-label="Notifications"
         >
           <Bell className="size-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#3F6F5E] px-1 text-[10px] font-medium text-white">
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0B4F6C] px-1 text-[10px] font-medium text-white">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between border-b border-[#F1F1F1] px-4 py-3">
-          <h3 className="text-sm font-semibold text-[#4A4A4A] font-[family-name:var(--font-inter)]">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] px-4 py-3">
+          <h3 className="text-sm font-semibold text-[#333333] font-[family-name:var(--font-inter)]">
             Notifications
           </h3>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-[#DDEFE6] px-2 py-0.5 text-[11px] font-medium text-[#3F6F5E]">
+            <span className="rounded-full bg-[#E8F4F8] px-2 py-0.5 text-[11px] font-medium text-[#0B4F6C]">
               {unreadCount} new
             </span>
           )}
@@ -113,14 +113,14 @@ export function NotificationBell() {
         <ScrollArea className="max-h-80">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-sm text-[#4A4A4A]/60 font-[family-name:var(--font-inter)]">
+              <p className="text-sm text-[#333333]/60 font-[family-name:var(--font-inter)]">
                 Loading...
               </p>
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <Bell className="mb-2 size-5 text-[#4A4A4A]/30" />
-              <p className="text-sm text-[#4A4A4A]/60 font-[family-name:var(--font-inter)]">
+              <Bell className="mb-2 size-5 text-[#333333]/30" />
+              <p className="text-sm text-[#333333]/60 font-[family-name:var(--font-inter)]">
                 No notifications yet
               </p>
             </div>
@@ -136,21 +136,21 @@ export function NotificationBell() {
                     }}
                     className={cn(
                       "w-full text-left px-4 py-3 transition-colors hover:bg-[#F9F9F9]",
-                      !notification.read && "bg-[#DDEFE6]/30"
+                      !notification.read && "bg-[#E8F4F8]/30"
                     )}
                   >
                     <div className="flex items-start gap-2">
                       {!notification.read && (
-                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#3F6F5E]" />
+                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#0B4F6C]" />
                       )}
                       <div className={cn(!notification.read ? "" : "pl-4")}>
-                        <p className="text-sm font-medium text-[#4A4A4A] font-[family-name:var(--font-inter)]">
+                        <p className="text-sm font-medium text-[#333333] font-[family-name:var(--font-inter)]">
                           {notification.title}
                         </p>
-                        <p className="mt-0.5 text-xs text-[#4A4A4A]/70 font-[family-name:var(--font-inter)] line-clamp-2">
+                        <p className="mt-0.5 text-xs text-[#333333]/70 font-[family-name:var(--font-inter)] line-clamp-2">
                           {notification.body}
                         </p>
-                        <p className="mt-1 text-[11px] text-[#4A4A4A]/50 font-[family-name:var(--font-inter)]">
+                        <p className="mt-1 text-[11px] text-[#333333]/50 font-[family-name:var(--font-inter)]">
                           {formatDistanceToNow(new Date(notification.createdAt), {
                             addSuffix: true,
                           })}
@@ -159,7 +159,7 @@ export function NotificationBell() {
                     </div>
                   </button>
                   {index < notifications.length - 1 && (
-                    <Separator className="bg-[#F1F1F1]" />
+                    <Separator className="bg-[#E2E8F0]" />
                   )}
                 </div>
               ))}

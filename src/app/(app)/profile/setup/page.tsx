@@ -107,16 +107,16 @@ export default function ProfileSetupPage() {
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <div className="mb-10 text-center">
-          <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-semibold tracking-tight text-[#4A4A4A] sm:text-5xl">
+          <h1 className="font-[family-name:var(--font-heading)] text-4xl font-semibold tracking-tight text-[#333333] sm:text-5xl">
             Complete Your Profile
           </h1>
-          <p className="mt-4 text-lg text-[#4A4A4A]/70">
+          <p className="mt-4 text-lg text-[#333333]/70">
             Tell us about yourself so we can find your perfect match.
           </p>
         </div>
 
         {/* Form Card */}
-        <Card className="border-[#F1F1F1] bg-white shadow-sm">
+        <Card className="border-[#E2E8F0] bg-white shadow-sm">
           <CardContent className="pt-2">
             <Form {...form}>
               <form
@@ -129,13 +129,13 @@ export default function ProfileSetupPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#4A4A4A] font-medium">
+                      <FormLabel className="text-[#333333] font-medium">
                         Name
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your full name"
-                          className="border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20"
+                          className="border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                           {...field}
                         />
                       </FormControl>
@@ -151,7 +151,7 @@ export default function ProfileSetupPage() {
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#4A4A4A] font-medium">
+                        <FormLabel className="text-[#333333] font-medium">
                           Age
                         </FormLabel>
                         <FormControl>
@@ -160,7 +160,7 @@ export default function ProfileSetupPage() {
                             placeholder="25"
                             min={18}
                             max={100}
-                            className="border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20"
+                            className="border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                             {...field}
                             value={field.value ?? ""}
                             onChange={(e) =>
@@ -182,7 +182,7 @@ export default function ProfileSetupPage() {
                     name="ageBracket"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#4A4A4A] font-medium">
+                        <FormLabel className="text-[#333333] font-medium">
                           Age Bracket
                         </FormLabel>
                         <Select
@@ -190,7 +190,7 @@ export default function ProfileSetupPage() {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20">
+                            <SelectTrigger className="w-full border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20">
                               <SelectValue placeholder="Select age bracket" />
                             </SelectTrigger>
                           </FormControl>
@@ -217,7 +217,7 @@ export default function ProfileSetupPage() {
                   name="gender"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#4A4A4A] font-medium">
+                      <FormLabel className="text-[#333333] font-medium">
                         Gender
                       </FormLabel>
                       <Select
@@ -225,7 +225,7 @@ export default function ProfileSetupPage() {
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20">
+                          <SelectTrigger className="w-full border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20">
                             <SelectValue placeholder="Select gender" />
                           </SelectTrigger>
                         </FormControl>
@@ -251,7 +251,7 @@ export default function ProfileSetupPage() {
                   name="skillLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#4A4A4A] font-medium">
+                      <FormLabel className="text-[#333333] font-medium">
                         Skill Level
                       </FormLabel>
                       <FormControl>
@@ -271,8 +271,8 @@ export default function ProfileSetupPage() {
                               <div
                                 className={`relative flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-4 text-center transition-all ${
                                   field.value === level.value
-                                    ? "border-[#3F6F5E] bg-[#DDEFE6]/50 text-[#3F6F5E]"
-                                    : "border-[#F1F1F1] bg-white text-[#4A4A4A]/70 hover:border-[#DDEFE6] hover:bg-[#DDEFE6]/20"
+                                    ? "border-[#0B4F6C] bg-[#E8F4F8]/50 text-[#0B4F6C]"
+                                    : "border-[#E2E8F0] bg-white text-[#333333]/70 hover:border-[#E8F4F8] hover:bg-[#E8F4F8]/20"
                                 }`}
                               >
                                 <span className="text-xl font-semibold">
@@ -303,7 +303,7 @@ export default function ProfileSetupPage() {
                     name="radiusMiles"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#4A4A4A] font-medium">
+                        <FormLabel className="text-[#333333] font-medium">
                           Play Radius
                         </FormLabel>
                         <Select
@@ -313,7 +313,7 @@ export default function ProfileSetupPage() {
                           value={field.value?.toString()}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20">
+                            <SelectTrigger className="w-full border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20">
                               <SelectValue placeholder="Select radius" />
                             </SelectTrigger>
                           </FormControl>
@@ -338,13 +338,13 @@ export default function ProfileSetupPage() {
                     name="zip"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#4A4A4A] font-medium">
+                        <FormLabel className="text-[#333333] font-medium">
                           Zip Code
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="e.g. 95014"
-                            className="border-[#F1F1F1] focus-visible:border-[#3F6F5E] focus-visible:ring-[#3F6F5E]/20"
+                            className="border-[#E2E8F0] focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                             {...field}
                           />
                         </FormControl>
@@ -359,7 +359,7 @@ export default function ProfileSetupPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-12 w-full rounded-xl bg-[#3F6F5E] text-base font-medium text-white hover:bg-[#3F6F5E]/90 transition-colors"
+                    className="h-12 w-full rounded-xl bg-[#0B4F6C] text-base font-medium text-white hover:bg-[#0B4F6C]/90 transition-colors"
                   >
                     {loading ? "Saving..." : "Save Profile"}
                   </Button>

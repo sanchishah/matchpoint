@@ -80,28 +80,28 @@ export default function AdminGamesPage() {
     }
   };
 
-  if (loading) return <p className="text-[#717171]">Loading games...</p>;
+  if (loading) return <p className="text-[#64748B]">Loading games...</p>;
 
   return (
     <div>
-      <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-6">
+      <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-6">
         Games ({games.length})
       </h2>
 
       <div className="space-y-4">
         {games.map((game) => (
-          <Card key={game.id} className="border-[#F1F1F1] rounded-2xl p-5">
+          <Card key={game.id} className="border-[#E2E8F0] rounded-xl p-5">
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-[#2A2A2A] font-medium">{game.slot.club.name}</h3>
+                  <h3 className="text-[#0A0A0A] font-medium">{game.slot.club.name}</h3>
                   <Badge className={`border-0 rounded-full text-xs ${
-                    game.status === "CONFIRMED" ? "bg-[#DDEFE6] text-[#3F6F5E]" :
+                    game.status === "CONFIRMED" ? "bg-[#E8F4F8] text-[#0B4F6C]" :
                     game.status === "COMPLETED" ? "bg-gray-100 text-gray-600" :
                     "bg-red-50 text-red-600"
                   }`}>{game.status}</Badge>
                 </div>
-                <div className="flex flex-wrap gap-3 text-sm text-[#717171]">
+                <div className="flex flex-wrap gap-3 text-sm text-[#64748B]">
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(game.startTime), "MMM d, h:mm a")}</span>
                   <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{game.participants.length} players</span>
                   <span className="flex items-center gap-1"><CreditCard className="w-3.5 h-3.5" />${(game.slot.totalCostCents / 100).toFixed(2)}</span>
@@ -116,7 +116,7 @@ export default function AdminGamesPage() {
               </div>
               <div className="flex gap-2">
                 {game.status === "CONFIRMED" && new Date() > new Date(game.endTime) && (
-                  <Button size="sm" className="bg-[#3F6F5E] text-white rounded-full text-xs" onClick={() => openAttendance(game)}>
+                  <Button size="sm" className="bg-[#0B4F6C] text-white rounded-lg text-xs" onClick={() => openAttendance(game)}>
                     <Check className="w-3.5 h-3.5 mr-1" /> Attendance
                   </Button>
                 )}
@@ -125,20 +125,20 @@ export default function AdminGamesPage() {
 
             {/* Payments */}
             {game.payments && game.payments.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-[#F1F1F1]">
-                <p className="text-xs text-[#717171] mb-2">Payments:</p>
+              <div className="mt-3 pt-3 border-t border-[#E2E8F0]">
+                <p className="text-xs text-[#64748B] mb-2">Payments:</p>
                 <div className="space-y-1">
                   {game.payments.map((pay) => {
                     const player = game.participants.find((p) => p.userId === pay.userId);
                     return (
                       <div key={pay.userId} className="flex justify-between items-center text-xs">
-                        <span className="text-[#4A4A4A]">
+                        <span className="text-[#333333]">
                           {player?.user.profile?.name || player?.user.email} — ${(pay.amountCents / 100).toFixed(2)}
                         </span>
                         <div className="flex items-center gap-2">
                           <Badge className={`border-0 rounded-full text-[10px] ${
-                            pay.status === "SUCCEEDED" ? "bg-[#DDEFE6] text-[#3F6F5E]" :
-                            pay.status === "REFUNDED" ? "bg-[#E6F0F6] text-blue-600" :
+                            pay.status === "SUCCEEDED" ? "bg-[#E8F4F8] text-[#0B4F6C]" :
+                            pay.status === "REFUNDED" ? "bg-[#F1F5F9] text-blue-600" :
                             "bg-red-50 text-red-600"
                           }`}>{pay.status}</Badge>
                           {pay.status === "SUCCEEDED" && (
@@ -161,25 +161,25 @@ export default function AdminGamesPage() {
       <Dialog open={!!selectedGame} onOpenChange={(open) => !open && setSelectedGame(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-[family-name:var(--font-playfair)]">Mark Attendance</DialogTitle>
+            <DialogTitle className="font-[family-name:var(--font-heading)]">Mark Attendance</DialogTitle>
           </DialogHeader>
           {selectedGame && (
             <div className="space-y-4 mt-4">
               {selectedGame.participants.map((p) => (
                 <div key={p.userId} className="flex items-center justify-between">
-                  <span className="text-sm text-[#4A4A4A]">{p.user.profile?.name || p.user.name}</span>
+                  <span className="text-sm text-[#333333]">{p.user.profile?.name || p.user.name}</span>
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={attendanceMap[p.userId] ?? true}
                       onCheckedChange={(checked) => setAttendanceMap({ ...attendanceMap, [p.userId]: !!checked })}
                     />
-                    <span className="text-xs text-[#717171]">
+                    <span className="text-xs text-[#64748B]">
                       {attendanceMap[p.userId] ? "Present" : "No-show"}
                     </span>
                   </div>
                 </div>
               ))}
-              <Button onClick={submitAttendance} className="w-full bg-[#3F6F5E] text-white rounded-full">
+              <Button onClick={submitAttendance} className="w-full bg-[#0B4F6C] text-white rounded-lg">
                 Submit & Complete Game
               </Button>
             </div>

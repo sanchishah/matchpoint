@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="py-8">
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-[family-name:var(--font-playfair)] text-2xl text-[#2A2A2A] tracking-wide">
+          <h1 className="font-[family-name:var(--font-heading)] text-2xl text-[#0A0A0A] tracking-wide">
             Admin Dashboard
           </h1>
         </div>
@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link
               key={item.href}
               href={item.href}
-              className="px-4 py-2 text-sm rounded-full border border-[#F1F1F1] text-[#4A4A4A] hover:bg-[#DDEFE6] hover:text-[#3F6F5E] hover:border-[#3F6F5E] transition-colors whitespace-nowrap"
+              className="px-4 py-2 text-sm rounded-lg border border-[#E2E8F0] text-[#333333] hover:bg-[#E8F4F8] hover:text-[#0B4F6C] hover:border-[#0B4F6C] transition-colors whitespace-nowrap"
             >
               {item.label}
             </Link>

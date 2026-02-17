@@ -21,26 +21,26 @@ export default function InfoPage() {
     <div className="py-16">
       <div className="mx-auto max-w-3xl px-6">
         <div className="text-center mb-14">
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl md:text-4xl text-[#2A2A2A] mb-4 tracking-wide">
+          <h1 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#0A0A0A] mb-4 tracking-wide">
             Good to Know Before You Play
           </h1>
-          <p className="text-[#717171] max-w-md mx-auto">
+          <p className="text-[#64748B] max-w-md mx-auto">
             A few things to keep in mind as you get started with Matchpoint.
           </p>
         </div>
 
         <div className="space-y-6">
           {items.map((item) => (
-            <Card key={item.title} className="border-[#F1F1F1] rounded-2xl p-8">
+            <Card key={item.title} className="border-[#E2E8F0] rounded-xl p-8">
               <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#DDEFE6] flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-4 h-4 text-[#3F6F5E]" />
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-4 h-4 text-[#0B4F6C]" />
                 </div>
                 <div>
-                  <h2 className="font-[family-name:var(--font-playfair)] text-xl text-[#2A2A2A] mb-2">
+                  <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-2">
                     {item.title}
                   </h2>
-                  <p className="text-[#4A4A4A] leading-relaxed">{item.desc}</p>
+                  <p className="text-[#333333] leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             </Card>

@@ -53,12 +53,12 @@ export default function Navbar() {
   const userName = session?.user?.name;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#F1F1F1] bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-[#E2E8F0] bg-white/95 backdrop-blur-sm">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-1 text-xl font-semibold tracking-tight text-[#3F6F5E] font-[family-name:var(--font-playfair)]"
+          className="flex items-center gap-1 text-xl font-semibold tracking-tight text-[#0B4F6C] font-[family-name:var(--font-heading)]"
         >
           Matchpoint
         </Link>
@@ -69,7 +69,7 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-[#4A4A4A] transition-colors hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+              className="text-sm font-medium text-[#333333] transition-colors hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
             >
               {link.label}
             </Link>
@@ -86,10 +86,10 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-2 px-2 text-[#4A4A4A] hover:text-[#3F6F5E]"
+                    className="flex items-center gap-2 px-2 text-[#333333] hover:text-[#0B4F6C]"
                   >
                     <Avatar size="sm">
-                      <AvatarFallback className="bg-[#DDEFE6] text-[#3F6F5E] text-xs font-medium">
+                      <AvatarFallback className="bg-[#E8F4F8] text-[#0B4F6C] text-xs font-medium">
                         {getInitials(userName)}
                       </AvatarFallback>
                     </Avatar>
@@ -97,7 +97,7 @@ export default function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel className="font-[family-name:var(--font-inter)] text-[#4A4A4A]">
+                  <DropdownMenuLabel className="font-[family-name:var(--font-inter)] text-[#333333]">
                     {userName || "My Account"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -137,13 +137,13 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 asChild
-                className="text-sm text-[#4A4A4A] hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                className="text-sm text-[#333333] hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
               >
                 <Link href="/login">Login</Link>
               </Button>
               <Button
                 asChild
-                className="bg-[#3F6F5E] text-sm text-white hover:bg-[#3F6F5E]/90 font-[family-name:var(--font-inter)]"
+                className="bg-[#0B4F6C] text-sm text-white hover:bg-[#0B4F6C]/90 font-[family-name:var(--font-inter)]"
               >
                 <Link href="/signup">Get Started</Link>
               </Button>
@@ -159,7 +159,7 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#4A4A4A]"
+                className="text-[#333333]"
                 aria-label="Open menu"
               >
                 <Menu className="size-5" />
@@ -167,7 +167,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <SheetHeader>
-                <SheetTitle className="text-left text-lg font-semibold text-[#3F6F5E] font-[family-name:var(--font-playfair)]">
+                <SheetTitle className="text-left text-lg font-semibold text-[#0B4F6C] font-[family-name:var(--font-heading)]">
                   Matchpoint
                 </SheetTitle>
               </SheetHeader>
@@ -177,7 +177,7 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-[#4A4A4A] transition-colors hover:bg-[#DDEFE6]/50 hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                    className="rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                   >
                     {link.label}
                   </Link>
@@ -185,11 +185,11 @@ export default function Navbar() {
 
                 {isLoggedIn ? (
                   <>
-                    <div className="my-2 h-px bg-[#F1F1F1]" />
+                    <div className="my-2 h-px bg-[#E2E8F0]" />
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#4A4A4A] transition-colors hover:bg-[#DDEFE6]/50 hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                     >
                       <LayoutDashboard className="size-4" />
                       Dashboard
@@ -197,18 +197,18 @@ export default function Navbar() {
                     <Link
                       href="/dashboard/games"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#4A4A4A] transition-colors hover:bg-[#DDEFE6]/50 hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                     >
                       <Gamepad2 className="size-4" />
                       My Games
                     </Link>
-                    <div className="my-2 h-px bg-[#F1F1F1]" />
+                    <div className="my-2 h-px bg-[#E2E8F0]" />
                     <button
                       onClick={() => {
                         signOut();
                         setMobileOpen(false);
                       }}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-[#4A4A4A] transition-colors hover:bg-[#DDEFE6]/50 hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                     >
                       <LogOut className="size-4" />
                       Logout
@@ -216,18 +216,18 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
-                    <div className="my-2 h-px bg-[#F1F1F1]" />
+                    <div className="my-2 h-px bg-[#E2E8F0]" />
                     <Link
                       href="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm font-medium text-[#4A4A4A] transition-colors hover:bg-[#DDEFE6]/50 hover:text-[#3F6F5E] font-[family-name:var(--font-inter)]"
+                      className="rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                     >
                       Login
                     </Link>
                     <Link
                       href="/signup"
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md bg-[#3F6F5E] px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#3F6F5E]/90 font-[family-name:var(--font-inter)]"
+                      className="rounded-md bg-[#0B4F6C] px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#0B4F6C]/90 font-[family-name:var(--font-inter)]"
                     >
                       Get Started
                     </Link>
