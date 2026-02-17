@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendLoginEmail } from "@/lib/login-email";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -48,6 +49,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    async signIn({ user }) {
+      if (user.id) {
+        // Fire-and-forget — never block the login flow.
+        sendLoginEmail(user.id).catch(() => {
+          // Errors already logged inside sendLoginEmail; this catch
+          // prevents an unhandled rejection.
+        });
+      }
+    },
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
