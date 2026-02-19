@@ -206,6 +206,19 @@ model Payment {
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, userId])
+}
+
+// ─── Stripe Webhook Events ──────────────────────────
+
+model StripeWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String   @default("stripe")
+  eventId     String   @unique
+  processedAt DateTime
+  createdAt   DateTime @default(now())
+  payloadHash String?
 }
 
 // ─── Messages (Game Chat) ───────────────────────────

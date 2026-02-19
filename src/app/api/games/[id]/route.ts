@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { canWriteChat } from "@/lib/chat";
 
 export async function GET(
   _req: Request,
@@ -43,7 +44,11 @@ export async function GET(
             select: { id: true, name: true, profile: { select: { name: true } } },
           },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      },
+      _count: {
+        select: { messages: true },
       },
     },
   });
@@ -61,15 +66,19 @@ export async function GET(
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
-  const now = new Date();
-  const chatOpenTime = new Date(game.startTime);
-  chatOpenTime.setMinutes(chatOpenTime.getMinutes() - 15);
-  const chatOpen = now >= chatOpenTime && now <= game.endTime;
+  const chatStatus = canWriteChat(game);
+  const messagesTruncated = game._count.messages > 50;
+
+  // Reverse messages to asc order for the client
+  const messages = [...game.messages].reverse();
 
   return NextResponse.json({
     ...game,
-    chatOpen,
-    chatOpenTime,
+    messages,
+    chatOpen: chatStatus.ok,
+    chatOpenTime: chatStatus.openAt,
+    chatCloseTime: chatStatus.closeAt,
+    messagesTruncated,
     isParticipant,
     isAdmin,
   });

@@ -2,6 +2,57 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { messageSchema } from "@/lib/validations";
+import { requireGameChatAccess, canWriteChat } from "@/lib/chat";
+import { checkRateLimit, CHAT_BURST, CHAT_SUSTAINED } from "@/lib/rate-limit";
+import { pusherServer } from "@/lib/pusher/server";
+
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id: gameId } = await params;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+    await requireGameChatAccess(gameId, session.user.id, user?.role ?? undefined);
+  } catch (err: unknown) {
+    const e = err as { status?: number; message?: string };
+    return NextResponse.json(
+      { error: e.message || "Error" },
+      { status: e.status || 500 }
+    );
+  }
+
+  const url = new URL(req.url);
+  const cursor = url.searchParams.get("cursor");
+  const limit = Math.min(Number(url.searchParams.get("limit")) || 50, 100);
+
+  const messages = await prisma.message.findMany({
+    where: { gameId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    ...(cursor
+      ? { cursor: { id: cursor }, skip: 1 }
+      : {}),
+    include: {
+      user: {
+        select: { id: true, name: true, profile: { select: { name: true } } },
+      },
+    },
+  });
+
+  const nextCursor = messages.length === limit ? messages[messages.length - 1].id : null;
+
+  return NextResponse.json({ items: messages, nextCursor });
+}
 
 export async function POST(
   req: Request,
@@ -20,33 +71,45 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
-  // Check game exists and user is participant
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
-    include: { participants: true },
-  });
-
-  if (!game) {
-    return NextResponse.json({ error: "Game not found" }, { status: 404 });
-  }
-
-  const isParticipant = game.participants.some((p) => p.userId === session.user.id);
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  const isAdmin = user?.role === "ADMIN";
-
-  if (!isParticipant && !isAdmin) {
-    return NextResponse.json({ error: "Not a participant" }, { status: 403 });
-  }
-
-  // Enforce chat window: 15 min before start to end time
-  const now = new Date();
-  const chatOpenTime = new Date(game.startTime);
-  chatOpenTime.setMinutes(chatOpenTime.getMinutes() - 15);
-
-  if (now < chatOpenTime || now > game.endTime) {
+  let game;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+    const result = await requireGameChatAccess(gameId, session.user.id, user?.role ?? undefined);
+    game = result.game;
+  } catch (err: unknown) {
+    const e = err as { status?: number; message?: string };
     return NextResponse.json(
-      { error: "Chat is not open. It opens 15 minutes before the game and closes at game end." },
-      { status: 400 }
+      { error: e.message || "Error" },
+      { status: e.status || 500 }
+    );
+  }
+
+  // Enforce chat window
+  const chatCheck = canWriteChat(game);
+  if (!chatCheck.ok) {
+    return NextResponse.json({ error: chatCheck.reason }, { status: 400 });
+  }
+
+  // Rate limiting
+  const burstKey = `chatBurst:${session.user.id}:${gameId}`;
+  const sustainedKey = `chatSustained:${session.user.id}:${gameId}`;
+
+  const burstCheck = checkRateLimit(burstKey, CHAT_BURST);
+  if (!burstCheck.allowed) {
+    return NextResponse.json(
+      { error: "Too many messages, slow down" },
+      { status: 429 }
+    );
+  }
+
+  const sustainedCheck = checkRateLimit(sustainedKey, CHAT_SUSTAINED);
+  if (!sustainedCheck.allowed) {
+    return NextResponse.json(
+      { error: "Message rate limit exceeded, try again later" },
+      { status: 429 }
     );
   }
 
@@ -62,6 +125,11 @@ export async function POST(
       },
     },
   });
+
+  // Fire-and-forget Pusher broadcast
+  pusherServer
+    .trigger(`private-game-${gameId}`, "message:new", message)
+    .catch(() => {});
 
   return NextResponse.json(message);
 }
