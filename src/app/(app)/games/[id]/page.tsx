@@ -17,7 +17,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { SKILL_LEVELS } from "@/lib/constants";
-import { usePusherGameChat } from "@/hooks/usePusherGameChat";
 
 interface ChatMessage {
   id: string;
@@ -103,14 +102,29 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
     fetchGame();
   }, [id]);
 
-  // Realtime messages via Pusher
-  const handleNewMessage = useCallback((msg: ChatMessage) => {
-    if (messageIdsRef.current.has(msg.id)) return;
-    messageIdsRef.current.add(msg.id);
-    setMessages((prev) => [...prev, msg]);
-  }, []);
+  // Poll for new messages every 5 seconds
+  const pollMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/games/${id}/messages?limit=50`);
+      if (!res.ok) return;
+      const data: { items: ChatMessage[]; nextCursor: string | null } = await res.json();
+      // items are newest-first from API, reverse to asc
+      const fetched = [...data.items].reverse();
+      const newMsgs = fetched.filter((m) => !messageIdsRef.current.has(m.id));
+      if (newMsgs.length > 0) {
+        newMsgs.forEach((m) => messageIdsRef.current.add(m.id));
+        setMessages((prev) => [...prev, ...newMsgs]);
+      }
+    } catch {
+      // Silently ignore polling errors
+    }
+  }, [id]);
 
-  usePusherGameChat(id, handleNewMessage);
+  useEffect(() => {
+    if (!game?.chatOpen) return;
+    const interval = setInterval(pollMessages, 5000);
+    return () => clearInterval(interval);
+  }, [game?.chatOpen, pollMessages]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -156,8 +170,10 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
         const data = await res.json();
         toast.error(data.error);
         setMessage(body); // Restore on failure
+      } else {
+        // Immediately poll for new messages after successful send
+        await pollMessages();
       }
-      // Message will arrive via Pusher — no need to manually append
     } catch {
       toast.error("Failed to send message");
       setMessage(body);

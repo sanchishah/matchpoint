@@ -26,12 +26,6 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-vi.mock("@/lib/pusher/server", () => ({
-  pusherServer: {
-    trigger: vi.fn().mockResolvedValue(undefined),
-  },
-}));
-
 const { GET } = await import("@/app/api/games/[id]/messages/route");
 
 // ── Helpers ──────────────────────────────────────────────

@@ -56,8 +56,3 @@ export function canWriteChat(
   }
   return { ok: true, openAt, closeAt };
 }
-
-export function parseGameIdFromChannel(channelName: string): string | null {
-  const match = channelName.match(/^private-game-(.+)$/);
-  return match ? match[1] : null;
-}

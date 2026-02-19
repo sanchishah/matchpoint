@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth";
 import { messageSchema } from "@/lib/validations";
 import { requireGameChatAccess, canWriteChat } from "@/lib/chat";
 import { checkRateLimit, CHAT_BURST, CHAT_SUSTAINED } from "@/lib/rate-limit";
-import { pusherServer } from "@/lib/pusher/server";
 
 export async function GET(
   req: Request,
@@ -125,11 +124,6 @@ export async function POST(
       },
     },
   });
-
-  // Fire-and-forget Pusher broadcast
-  pusherServer
-    .trigger(`private-game-${gameId}`, "message:new", message)
-    .catch(() => {});
 
   return NextResponse.json(message);
 }

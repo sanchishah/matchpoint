@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { canWriteChat, parseGameIdFromChannel } from "@/lib/chat";
+import { canWriteChat } from "@/lib/chat";
 
 function makeGame(overrides: Partial<{ startTime: Date; endTime: Date; status: string }> = {}) {
   const start = overrides.startTime ?? new Date("2026-03-01T10:00:00Z");
@@ -72,17 +72,5 @@ describe("canWriteChat", () => {
     expect(result.openAt.getTime()).toBe(game.startTime.getTime() - 30 * 60 * 1000);
     // closeAt = endTime + 2h
     expect(result.closeAt.getTime()).toBe(game.endTime.getTime() + 2 * 60 * 60 * 1000);
-  });
-});
-
-describe("parseGameIdFromChannel", () => {
-  it("extracts gameId from valid channel name", () => {
-    expect(parseGameIdFromChannel("private-game-abc123")).toBe("abc123");
-  });
-
-  it("returns null for invalid channel format", () => {
-    expect(parseGameIdFromChannel("public-game-abc123")).toBeNull();
-    expect(parseGameIdFromChannel("private-chat-abc123")).toBeNull();
-    expect(parseGameIdFromChannel("")).toBeNull();
   });
 });
