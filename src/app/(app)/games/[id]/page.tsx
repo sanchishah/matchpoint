@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, useCallback, use } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow } from "date-fns";
 import {
-  Calendar, MapPin, Clock, Users, Send, Star, MessageCircle, Award,
+  Calendar, MapPin, Clock, Users, Send, Star, MessageCircle, Award, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { SKILL_LEVELS } from "@/lib/constants";
+import { usePusherGameChat } from "@/hooks/usePusherGameChat";
+
+interface ChatMessage {
+  id: string;
+  body: string;
+  createdAt: string;
+  user: { id: string; name: string | null; profile: { name: string } | null };
+}
 
 interface GameDetail {
   id: string;
@@ -25,6 +33,8 @@ interface GameDetail {
   status: string;
   chatOpen: boolean;
   chatOpenTime: string;
+  chatCloseTime: string;
+  messagesTruncated: boolean;
   isParticipant: boolean;
   isAdmin: boolean;
   slot: {
@@ -46,12 +56,7 @@ interface GameDetail {
   }[];
   payments: { amountCents: number; status: string }[];
   ratings: { rateeId: string; stars: number; feltLevel: string }[];
-  messages: {
-    id: string;
-    body: string;
-    createdAt: string;
-    user: { id: string; name: string | null; profile: { name: string } | null };
-  }[];
+  messages: ChatMessage[];
 }
 
 export default function GameDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +64,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const { data: session } = useSession();
   const router = useRouter();
   const [game, setGame] = useState<GameDetail | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -67,7 +73,11 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const [feltLevel, setFeltLevel] = useState("AT");
   const [ratingComment, setRatingComment] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatTopRef = useRef<HTMLDivElement>(null);
+  const messageIdsRef = useRef(new Set<string>());
 
   const fetchGame = async () => {
     try {
@@ -76,8 +86,12 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
         router.push("/games");
         return;
       }
-      const data = await res.json();
+      const data: GameDetail = await res.json();
       setGame(data);
+      // Initialize messages from game detail (already in asc order)
+      setMessages(data.messages);
+      messageIdsRef.current = new Set(data.messages.map((m) => m.id));
+      setHasOlderMessages(data.messagesTruncated);
     } catch {
       router.push("/games");
     } finally {
@@ -87,32 +101,66 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     fetchGame();
-    const interval = setInterval(fetchGame, 10000);
-    return () => clearInterval(interval);
   }, [id]);
 
+  // Realtime messages via Pusher
+  const handleNewMessage = useCallback((msg: ChatMessage) => {
+    if (messageIdsRef.current.has(msg.id)) return;
+    messageIdsRef.current.add(msg.id);
+    setMessages((prev) => [...prev, msg]);
+  }, []);
+
+  usePusherGameChat(id, handleNewMessage);
+
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [game?.messages]);
+  }, [messages]);
+
+  // Load older messages via paginated GET
+  const loadOlderMessages = async () => {
+    if (messages.length === 0) return;
+    setLoadingOlder(true);
+    try {
+      // The GET endpoint returns newest-first; we need messages older than our oldest
+      // Our oldest message is messages[0] (asc order). Use it as cursor to fetch older.
+      const oldestId = messages[0].id;
+      const res = await fetch(`/api/games/${id}/messages?cursor=${oldestId}&limit=50`);
+      if (!res.ok) return;
+      const data: { items: ChatMessage[]; nextCursor: string | null } = await res.json();
+      // items are in desc order (newest first), reverse to asc
+      const olderMessages = data.items.reverse();
+      const newMsgs = olderMessages.filter((m) => !messageIdsRef.current.has(m.id));
+      newMsgs.forEach((m) => messageIdsRef.current.add(m.id));
+      setMessages((prev) => [...newMsgs, ...prev]);
+      setHasOlderMessages(data.nextCursor !== null);
+    } catch {
+      toast.error("Failed to load older messages");
+    } finally {
+      setLoadingOlder(false);
+    }
+  };
 
   const sendMessage = async () => {
     if (!message.trim()) return;
+    const body = message.trim();
     setSending(true);
+    setMessage("");
     try {
       const res = await fetch(`/api/games/${id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: message }),
+        body: JSON.stringify({ body }),
       });
       if (!res.ok) {
         const data = await res.json();
         toast.error(data.error);
-      } else {
-        setMessage("");
-        fetchGame();
+        setMessage(body); // Restore on failure
       }
+      // Message will arrive via Pusher — no need to manually append
     } catch {
       toast.error("Failed to send message");
+      setMessage(body);
     } finally {
       setSending(false);
     }
@@ -361,14 +409,34 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
 
               {/* Messages */}
               <div className="flex-1 min-h-[300px] max-h-[500px] overflow-y-auto space-y-3 mb-4">
-                {game.messages.length === 0 ? (
+                {hasOlderMessages && (
+                  <div ref={chatTopRef} className="flex justify-center py-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-[#0B4F6C] hover:text-[#083D54]"
+                      onClick={loadOlderMessages}
+                      disabled={loadingOlder}
+                    >
+                      {loadingOlder ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load older messages"
+                      )}
+                    </Button>
+                  </div>
+                )}
+                {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-[#64748B] text-sm">
                       {game.chatOpen ? "No messages yet. Say hello!" : "Chat will appear here."}
                     </p>
                   </div>
                 ) : (
-                  game.messages.map((msg) => {
+                  messages.map((msg) => {
                     const isMe = msg.user.id === session?.user?.id;
                     const name = msg.user.profile?.name || msg.user.name || "Player";
                     return (
