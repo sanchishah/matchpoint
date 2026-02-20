@@ -7,7 +7,10 @@ frontend:
         # Write env vars to .env.production so Next.js picks them up at build + runtime
         - 'echo "DATABASE_URL=$DATABASE_URL" >> .env.production'
         - 'echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production'
+        - 'echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production'
+        - 'echo "AUTH_TRUST_HOST=$AUTH_TRUST_HOST" >> .env.production'
         - 'echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production'
+        - 'echo "AUTH_URL=$AUTH_URL" >> .env.production'
         - 'echo "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" >> .env.production'
         - 'echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" >> .env.production'
         - 'echo "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" >> .env.production'
