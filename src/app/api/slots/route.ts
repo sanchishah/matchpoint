@@ -7,12 +7,32 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   const { searchParams } = req.nextUrl;
 
-  const lat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : null;
-  const lng = searchParams.get("lng") ? parseFloat(searchParams.get("lng")!) : null;
+  let lat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : null;
+  let lng = searchParams.get("lng") ? parseFloat(searchParams.get("lng")!) : null;
   const radius = searchParams.get("radius") ? parseInt(searchParams.get("radius")!) : 10;
+  const zip = searchParams.get("zip");
+
+  // Geocode zip code to lat/lng if zip is provided but coordinates aren't
+  if (zip && lat === null && lng === null) {
+    try {
+      const geoRes = await fetch(`https://api.zippopotam.us/us/${zip}`);
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        const place = geoData?.places?.[0];
+        if (place) {
+          lat = parseFloat(place.latitude);
+          lng = parseFloat(place.longitude);
+        }
+      }
+    } catch {
+      // Continue without distance filtering if geocoding fails
+    }
+  }
   const date = searchParams.get("date");
-  const skillLevel = searchParams.get("skillLevel") ? parseInt(searchParams.get("skillLevel")!) : null;
-  const ageBracket = searchParams.get("ageBracket") || null;
+  const skillLevelRaw = searchParams.get("skillLevel");
+  const skillLevel = skillLevelRaw && skillLevelRaw !== "all" ? parseInt(skillLevelRaw) : null;
+  const ageBracketRaw = searchParams.get("ageBracket");
+  const ageBracket = ageBracketRaw && ageBracketRaw !== "all" ? ageBracketRaw : null;
   const clubId = searchParams.get("clubId") || null;
 
   const where: Record<string, unknown> = {

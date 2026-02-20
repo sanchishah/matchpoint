@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Instagram, Twitter, Facebook } from "lucide-react";
 
 const footerLinks = [
-  { href: "/about", label: "About" },
-  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/info", label: "About" },
+  { href: "/home#how-it-works", label: "How It Works" },
   { href: "/contact", label: "Contact" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
@@ -24,7 +24,7 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-8">
             {/* Brand */}
             <Link
-              href="/"
+              href="/home"
               className="text-2xl font-semibold tracking-tight text-white font-[family-name:var(--font-heading)]"
             >
               Matchpoint
@@ -62,7 +62,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-center text-xs text-[#B0BEC5]/70 font-[family-name:var(--font-inter)]">
-              Matchpoint &copy; 2025 &mdash; All rights reserved.
+              Matchpoint &copy; 2026 &mdash; All rights reserved.
             </p>
           </div>
         </div>

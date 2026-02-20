@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { confirmGame } from "@/lib/game-service";
 import { sendEmail, spotReservedEmail } from "@/lib/email";
 import { format } from "date-fns";
+import { checkRateLimit, JOIN_LIMIT } from "@/lib/rate-limit";
 
 export async function POST(
   _req: Request,
@@ -16,6 +17,14 @@ export async function POST(
 
   const { id: slotId } = await params;
   const userId = session.user.id;
+
+  const { allowed } = checkRateLimit(`join:${userId}`, JOIN_LIMIT);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
 
   // Check user profile exists
   const profile = await prisma.profile.findUnique({ where: { userId } });

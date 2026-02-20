@@ -4,9 +4,19 @@ import bcrypt from "bcryptjs";
 import { signupSchema } from "@/lib/validations";
 import { ADMIN_EMAILS } from "@/lib/constants";
 import { sendWelcomeEmail } from "@/lib/welcome-email";
+import { checkRateLimit, AUTH_LIMIT } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const { allowed } = checkRateLimit(`signup:${ip}`, AUTH_LIMIT);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many signup attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const parsed = signupSchema.safeParse(body);
 

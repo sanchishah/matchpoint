@@ -195,5 +195,5 @@ Elegant, minimal, lifestyle-brand aesthetic (Kate Spade vibe):
 - **Pastel Blue**: `#E6F0F6`
 - **Text**: `#4A4A4A`
 - **Borders**: `#F1F1F1`
-- **Headings**: Playfair Display (serif)
+- **Headings**: Montserrat (sans-serif)
 - **Body**: Inter (sans-serif)

@@ -31,9 +31,9 @@ import {
 import { NotificationBell } from "@/components/notification-bell";
 
 const navLinks = [
-  { href: "/", label: "Home" },
+  { href: "/home", label: "Home" },
   { href: "/book", label: "Book" },
-  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/home#how-it-works", label: "How It Works" },
 ];
 
 function getInitials(name?: string | null): string {
@@ -57,7 +57,7 @@ export default function Navbar() {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-1 text-xl font-semibold tracking-tight text-[#0B4F6C] font-[family-name:var(--font-heading)]"
         >
           Matchpoint

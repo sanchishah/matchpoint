@@ -39,3 +39,6 @@ export function checkRateLimit(
 
 export const CHAT_BURST = { maxRequests: 2, windowMs: 1_000 };
 export const CHAT_SUSTAINED = { maxRequests: 30, windowMs: 5 * 60 * 1_000 };
+export const AUTH_LIMIT = { maxRequests: 5, windowMs: 60 * 1_000 };
+export const CONTACT_LIMIT = { maxRequests: 3, windowMs: 60 * 1_000 };
+export const JOIN_LIMIT = { maxRequests: 10, windowMs: 60 * 1_000 };
