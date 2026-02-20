@@ -41,31 +41,29 @@ export async function confirmGame(slotId: string) {
 
   for (const participant of slot.participants) {
     try {
-      // Create Stripe PaymentIntent
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: perPersonCents,
-        currency: "usd",
-        confirm: true,
-        payment_method: "pm_card_visa",
-        automatic_payment_methods: {
-          enabled: true,
-          allow_redirects: "never",
+      // Create Stripe PaymentIntent (unconfirmed — user pays via Stripe Elements)
+      const paymentIntent = await stripe.paymentIntents.create(
+        {
+          amount: perPersonCents,
+          currency: "usd",
+          automatic_payment_methods: { enabled: true },
+          metadata: {
+            gameId: game.id,
+            slotId: slot.id,
+            userId: participant.userId,
+          },
         },
-        metadata: {
-          gameId: game.id,
-          slotId: slot.id,
-          userId: participant.userId,
-        },
-      });
+        { idempotencyKey: `game:${game.id}:user:${participant.userId}` }
+      );
 
-      // Record payment
+      // Record payment as PENDING — webhook updates to SUCCEEDED after user pays
       await prisma.payment.create({
         data: {
           gameId: game.id,
           userId: participant.userId,
           amountCents: perPersonCents,
           stripePaymentIntentId: paymentIntent.id,
-          status: "SUCCEEDED",
+          status: "PENDING",
         },
       });
 
@@ -86,17 +84,17 @@ export async function confirmGame(slotId: string) {
       );
       sendEmail({ to: participant.user.email, ...emailData });
 
-      // Create notification
+      // Create notification prompting user to pay
       await prisma.notification.create({
         data: {
           userId: participant.userId,
           type: "GAME_CONFIRMED",
-          title: "Game Confirmed!",
-          body: `Your game at ${slot.club.name} on ${dateStr} is confirmed. ${formatCents(perPersonCents)} has been charged.`,
+          title: "Game Confirmed — Payment Required",
+          body: `Your game at ${slot.club.name} on ${dateStr} is confirmed. Please pay ${formatCents(perPersonCents)} to secure your spot.`,
         },
       });
     } catch (error) {
-      console.error(`Payment failed for user ${participant.userId}:`, error);
+      console.error(`Payment setup failed for user ${participant.userId}:`, error);
 
       // Mark participant as payment failed
       await prisma.slotParticipant.update({
@@ -124,7 +122,6 @@ export async function confirmGame(slotId: string) {
             where: { id: waitlisted.id },
             data: { status: "JOINED" },
           });
-          // Recursively retry would be complex; for MVP, log it
           console.log(`Promoted waitlisted user ${waitlisted.userId} for slot ${slotId}`);
         }
       }

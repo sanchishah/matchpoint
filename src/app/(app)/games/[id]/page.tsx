@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow } from "date-fns";
 import {
-  Calendar, MapPin, Clock, Users, Send, Star, MessageCircle, Award, Loader2,
+  Calendar, MapPin, Clock, Users, Send, Star, MessageCircle, Award, Loader2, CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,55 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { SKILL_LEVELS } from "@/lib/constants";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+function PaymentForm({ onSuccess }: { onSuccess: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setProcessing(true);
+    const { error } = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+    });
+
+    if (error) {
+      toast.error(error.message || "Payment failed");
+      setProcessing(false);
+    } else {
+      toast.success("Payment successful!");
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      <Button
+        type="submit"
+        className="w-full bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full"
+        disabled={!stripe || processing}
+      >
+        {processing ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          "Confirm Payment"
+        )}
+      </Button>
+    </form>
+  );
+}
 
 interface ChatMessage {
   id: string;
@@ -74,6 +123,9 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const [submittingRating, setSubmittingRating] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatTopRef = useRef<HTMLDivElement>(null);
   const messageIdsRef = useRef(new Set<string>());
@@ -211,6 +263,25 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  const initPayment = async () => {
+    try {
+      const res = await fetch(`/api/games/${id}/payments/create-intent`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Could not start payment");
+        return;
+      }
+      const data = await res.json();
+      setClientSecret(data.clientSecret);
+      setPaymentAmount(data.amountCents);
+      setShowPayment(true);
+    } catch {
+      toast.error("Failed to initialize payment");
+    }
+  };
+
   if (loading || !game) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -266,6 +337,41 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
             <p className="text-sm text-[#64748B] mt-2">
               Your share: ${(game.payments[0].amountCents / 100).toFixed(2)} · {game.payments[0].status}
             </p>
+          )}
+
+          {/* Pay Now button for PENDING payments */}
+          {game.payments.length > 0 && game.payments[0].status === "PENDING" && !showPayment && (
+            <Button
+              className="mt-3 bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full"
+              onClick={initPayment}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Pay Now — ${(game.payments[0].amountCents / 100).toFixed(2)}
+            </Button>
+          )}
+
+          {/* Stripe Elements Payment Form */}
+          {showPayment && clientSecret && (
+            <Card className="mt-4 border-[#E2E8F0] rounded-xl p-6 max-w-md">
+              <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A] mb-1">
+                Complete Payment
+              </h3>
+              <p className="text-sm text-[#64748B] mb-4">
+                Amount: ${(paymentAmount / 100).toFixed(2)}
+              </p>
+              <Elements
+                stripe={stripePromise}
+                options={{ clientSecret, appearance: { theme: "stripe" } }}
+              >
+                <PaymentForm
+                  onSuccess={() => {
+                    setShowPayment(false);
+                    setClientSecret(null);
+                    fetchGame();
+                  }}
+                />
+              </Elements>
+            </Card>
           )}
         </div>
 

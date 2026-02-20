@@ -10,15 +10,20 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  });
+  const [profile, strikeCount] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { userId: session.user.id },
+    }),
+    prisma.strike.count({
+      where: { userId: session.user.id },
+    }),
+  ]);
 
   if (!profile) {
     return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
-  return NextResponse.json(profile);
+  return NextResponse.json({ ...profile, strikeCount });
 }
 
 export async function POST(request: Request) {
@@ -38,12 +43,31 @@ export async function POST(request: Request) {
     );
   }
 
+  const data = { ...parsed.data };
+
+  // Geocode zip code if provided and lat/lng are not already set
+  if (data.zip && !data.lat && !data.lng) {
+    try {
+      const geoRes = await fetch(`https://api.zippopotam.us/us/${data.zip}`);
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        const place = geoData?.places?.[0];
+        if (place) {
+          data.lat = parseFloat(place.latitude);
+          data.lng = parseFloat(place.longitude);
+        }
+      }
+    } catch {
+      // Fail silently — profile saves without coordinates
+    }
+  }
+
   const profile = await prisma.profile.upsert({
     where: { userId: session.user.id },
-    update: parsed.data,
+    update: data,
     create: {
       userId: session.user.id,
-      ...parsed.data,
+      ...data,
     },
   });
 

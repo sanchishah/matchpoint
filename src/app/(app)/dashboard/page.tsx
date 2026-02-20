@@ -16,6 +16,7 @@ interface ProfileData {
   ageBracket: string;
   radiusMiles: number;
   zip: string;
+  strikeCount?: number;
 }
 
 interface GameData {
@@ -35,7 +36,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<GameData[]>([]);
-  const [strikes, setStrikes] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                 Strikes
               </h2>
             </div>
-            <p className="text-3xl font-light text-[#0A0A0A]">{strikes} / 3</p>
+            <p className="text-3xl font-light text-[#0A0A0A]">{profile?.strikeCount ?? 0} / 3</p>
             <p className="text-xs text-[#64748B] mt-2">No-show strikes. 3 strikes = restricted.</p>
           </Card>
         </div>

@@ -113,7 +113,7 @@ export default function Navbar() {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/dashboard/games"
+                        href="/games"
                         className="cursor-pointer font-[family-name:var(--font-inter)]"
                       >
                         <Gamepad2 className="size-4" />
@@ -195,7 +195,7 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                     <Link
-                      href="/dashboard/games"
+                      href="/games"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
                     >

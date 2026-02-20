@@ -35,6 +35,24 @@ interface SlotData {
   userWaitlisted: boolean;
 }
 
+interface Recommendation {
+  slot: {
+    id: string;
+    club: { id: string; name: string; address: string; city: string };
+    startTime: string;
+    durationMins: number;
+    format: string;
+    requiredPlayers: number;
+    totalCostCents: number;
+    skillLevel: number;
+    ageBracket: string;
+    joinedCount: number;
+  };
+  score: number;
+  reasons: string[];
+  distance: number;
+}
+
 export default function BookPage() {
   const { data: session } = useSession();
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -47,6 +65,8 @@ export default function BookPage() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [joining, setJoining] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recsLoading, setRecsLoading] = useState(false);
 
   const fetchSlots = useCallback(async () => {
     setLoading(true);
@@ -84,6 +104,25 @@ export default function BookPage() {
   useEffect(() => {
     fetchFavorites();
   }, [fetchFavorites]);
+
+  useEffect(() => {
+    if (!session) return;
+    const fetchRecs = async () => {
+      setRecsLoading(true);
+      try {
+        const res = await fetch("/api/matchmaking/slots?limit=4");
+        if (res.ok) {
+          const data = await res.json();
+          setRecommendations(data);
+        }
+      } catch {
+        // Skip silently — recommendations are non-critical
+      } finally {
+        setRecsLoading(false);
+      }
+    };
+    fetchRecs();
+  }, [session]);
 
   const toggleFavorite = async (clubId: string) => {
     if (!session) {
@@ -166,6 +205,63 @@ export default function BookPage() {
         <p className="text-[#64748B] mb-8 max-w-xl">
           Browse available courts in the South Bay. You&apos;re only charged when a game is confirmed.
         </p>
+
+        {/* Recommended for You */}
+        {session && !recsLoading && recommendations.length > 0 && (
+          <div className="mb-10">
+            <h2 className="font-[family-name:var(--font-heading)] text-2xl text-[#0A0A0A] mb-4 tracking-wide">
+              Recommended for You
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+              {recommendations.map((rec) => {
+                const perPersonCents = Math.round(rec.slot.totalCostCents / rec.slot.requiredPlayers);
+                const spotsLeft = rec.slot.requiredPlayers - rec.slot.joinedCount;
+                return (
+                  <Card
+                    key={rec.slot.id}
+                    className="border-[#0B4F6C]/20 bg-[#E8F4F8]/30 rounded-xl p-5 hover:shadow-md transition-shadow"
+                  >
+                    <h3 className="font-[family-name:var(--font-heading)] text-base text-[#0A0A0A] mb-1">
+                      {rec.slot.club.name}
+                    </h3>
+                    <p className="text-xs text-[#64748B] mb-2">{rec.distance} mi away</p>
+                    <p className="text-sm text-[#333333] mb-2">
+                      <Clock className="w-3.5 h-3.5 inline mr-1" />
+                      {format(new Date(rec.slot.startTime), "EEE, MMM d · h:mm a")}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {rec.reasons.map((r) => (
+                        <Badge
+                          key={r}
+                          variant="secondary"
+                          className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full text-[10px] px-2 py-0.5"
+                        >
+                          {r}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-lg font-medium text-[#0A0A0A]">
+                        ${(perPersonCents / 100).toFixed(2)}
+                        <span className="text-xs text-[#64748B] font-normal"> /person</span>
+                      </span>
+                      <span className="text-xs text-[#64748B]">
+                        {spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} left
+                      </span>
+                    </div>
+                    <Button
+                      className="w-full bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full text-sm"
+                      onClick={() => joinSlot(rec.slot.id)}
+                      disabled={joining === rec.slot.id}
+                    >
+                      {joining === rec.slot.id ? "Reserving..." : "Reserve"}
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="mb-8">
