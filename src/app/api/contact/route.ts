@@ -19,9 +19,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: "Message sent successfully" });
-  } catch {
+  } catch (err) {
+    console.error("[contact] DB error:", err);
     return NextResponse.json(
-      { error: "Failed to send message" },
+      { error: "Failed to send message", debug: String(err) },
       { status: 500 }
     );
   }
