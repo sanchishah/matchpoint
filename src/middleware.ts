@@ -1,13 +1,17 @@
-import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 const protectedPaths = ["/dashboard", "/games", "/book", "/profile", "/admin"];
 const authPaths = ["/login", "/signup"];
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
-  const role = req.auth?.user?.role;
+
+  // getToken decodes the JWT from cookies — works in Edge, no DB needed
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isLoggedIn = !!token;
+  const role = token?.role as string | undefined;
 
   // Redirect authenticated users away from auth pages
   if (isLoggedIn && authPaths.some((p) => pathname.startsWith(p))) {
@@ -27,7 +31,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
