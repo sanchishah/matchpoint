@@ -6,6 +6,16 @@ frontend:
         - npm ci
         - npx prisma generate
         - npx prisma migrate deploy
+        - 'echo "DATABASE_URL=$DATABASE_URL" >> .env.production'
+        - 'echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production'
+        - 'echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production'
+        - 'echo "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" >> .env.production'
+        - 'echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" >> .env.production'
+        - 'echo "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" >> .env.production'
+        - 'echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env.production'
+        - 'echo "EMAIL_FROM=$EMAIL_FROM" >> .env.production'
+        - 'echo "APP_BASE_URL=$APP_BASE_URL" >> .env.production'
+        - 'echo "ADMIN_EMAILS=$ADMIN_EMAILS" >> .env.production'
     build:
       commands:
         - npm run build
