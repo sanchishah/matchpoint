@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import { loginSchema } from "@/lib/validations";
 import {
   Form,
   FormControl,
@@ -28,36 +25,38 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-type LoginValues = z.infer<typeof loginSchema>;
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+});
 
-export default function LoginPage() {
-  const router = useRouter();
+type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+
+export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const form = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
   });
 
-  async function onSubmit(values: LoginValues) {
+  async function onSubmit(values: ForgotPasswordValues) {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email }),
       });
 
-      if (result?.error) {
-        toast.error("Invalid email or password. Please try again.");
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Something went wrong");
         return;
       }
 
-      router.push("/dashboard");
+      setSubmitted(true);
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -65,14 +64,40 @@ export default function LoginPage() {
     }
   }
 
+  if (submitted) {
+    return (
+      <Card className="border-[#E2E8F0] shadow-none">
+        <CardHeader className="pb-2 pt-8 px-8">
+          <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-[#333333] text-center">
+            Check Your Email
+          </h2>
+        </CardHeader>
+        <CardContent className="px-8 pt-4 pb-4">
+          <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/70 text-center leading-relaxed">
+            If an account with that email exists, we&apos;ve sent a link to
+            reset your password. It expires in 1 hour.
+          </p>
+        </CardContent>
+        <CardFooter className="justify-center pb-8 px-8">
+          <Link
+            href="/login"
+            className="font-[family-name:var(--font-inter)] text-sm text-[#0B4F6C] font-medium hover:underline underline-offset-4"
+          >
+            Back to Sign In
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-[#E2E8F0] shadow-none">
       <CardHeader className="pb-2 pt-8 px-8">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-[#333333] text-center">
-          Welcome Back
+          Forgot Password
         </h2>
         <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60 text-center mt-1">
-          Sign in to your account to continue
+          Enter your email and we&apos;ll send you a reset link
         </p>
       </CardHeader>
 
@@ -100,36 +125,6 @@ export default function LoginPage() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-[family-name:var(--font-inter)] text-[#333333] text-xs uppercase tracking-wider">
-                    Password
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Your password"
-                      className="h-11 border-[#E2E8F0] bg-white font-[family-name:var(--font-inter)] text-[#333333] placeholder:text-[#333333]/30 focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="font-[family-name:var(--font-inter)] text-xs text-[#0B4F6C] hover:underline underline-offset-4"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
             <div className="pt-2">
               <Button
                 type="submit"
@@ -139,10 +134,10 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing In...
+                    Sending...
                   </>
                 ) : (
-                  "Sign In"
+                  "Send Reset Link"
                 )}
               </Button>
             </div>
@@ -152,12 +147,12 @@ export default function LoginPage() {
 
       <CardFooter className="justify-center pb-8 px-8">
         <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60">
-          Don&apos;t have an account?{" "}
+          Remember your password?{" "}
           <Link
-            href="/signup"
+            href="/login"
             className="text-[#0B4F6C] font-medium hover:underline underline-offset-4"
           >
-            Sign up
+            Sign in
           </Link>
         </p>
       </CardFooter>

@@ -119,6 +119,29 @@ export async function POST() {
     results.push(`Expired ${expiredSlots.count} unfilled slots`);
   }
 
+  // 5. Auto-complete games whose endTime has passed
+  const completedGames = await prisma.game.updateMany({
+    where: {
+      status: "CONFIRMED",
+      endTime: { lt: now },
+    },
+    data: { status: "COMPLETED" },
+  });
+  if (completedGames.count > 0) {
+    // Also mark corresponding slots as COMPLETED
+    await prisma.slot.updateMany({
+      where: {
+        game: {
+          status: "COMPLETED",
+          endTime: { lt: now },
+        },
+        status: "CONFIRMED",
+      },
+      data: { status: "COMPLETED" },
+    });
+    results.push(`Auto-completed ${completedGames.count} past games`);
+  }
+
   return NextResponse.json({
     ran: new Date().toISOString(),
     results,

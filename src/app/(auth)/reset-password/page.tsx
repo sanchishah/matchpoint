@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-import { loginSchema } from "@/lib/validations";
 import {
   Form,
   FormControl,
@@ -28,36 +26,73 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-type LoginValues = z.infer<typeof loginSchema>;
-
-export default function LoginPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
   });
 
-  async function onSubmit(values: LoginValues) {
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
+
+function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { password: "", confirmPassword: "" },
+  });
+
+  if (!token) {
+    return (
+      <Card className="border-[#E2E8F0] shadow-none">
+        <CardHeader className="pb-2 pt-8 px-8">
+          <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-[#333333] text-center">
+            Invalid Link
+          </h2>
+        </CardHeader>
+        <CardContent className="px-8 pt-4 pb-4">
+          <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/70 text-center leading-relaxed">
+            This password reset link is invalid. Please request a new one.
+          </p>
+        </CardContent>
+        <CardFooter className="justify-center pb-8 px-8">
+          <Link
+            href="/forgot-password"
+            className="font-[family-name:var(--font-inter)] text-sm text-[#0B4F6C] font-medium hover:underline underline-offset-4"
+          >
+            Request New Link
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  async function onSubmit(values: ResetPasswordValues) {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password: values.password }),
       });
 
-      if (result?.error) {
-        toast.error("Invalid email or password. Please try again.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Something went wrong");
         return;
       }
 
-      router.push("/dashboard");
+      toast.success("Password reset successfully!");
+      router.push("/login");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -69,10 +104,10 @@ export default function LoginPage() {
     <Card className="border-[#E2E8F0] shadow-none">
       <CardHeader className="pb-2 pt-8 px-8">
         <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-[#333333] text-center">
-          Welcome Back
+          Reset Password
         </h2>
         <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60 text-center mt-1">
-          Sign in to your account to continue
+          Enter your new password below
         </p>
       </CardHeader>
 
@@ -81,16 +116,16 @@ export default function LoginPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
-              name="email"
+              name="password"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-[family-name:var(--font-inter)] text-[#333333] text-xs uppercase tracking-wider">
-                    Email
+                    New Password
                   </FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="you@example.com"
+                      type="password"
+                      placeholder="At least 6 characters"
                       className="h-11 border-[#E2E8F0] bg-white font-[family-name:var(--font-inter)] text-[#333333] placeholder:text-[#333333]/30 focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                       {...field}
                     />
@@ -102,16 +137,16 @@ export default function LoginPage() {
 
             <FormField
               control={form.control}
-              name="password"
+              name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-[family-name:var(--font-inter)] text-[#333333] text-xs uppercase tracking-wider">
-                    Password
+                    Confirm Password
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Your password"
+                      placeholder="Re-enter your password"
                       className="h-11 border-[#E2E8F0] bg-white font-[family-name:var(--font-inter)] text-[#333333] placeholder:text-[#333333]/30 focus-visible:border-[#0B4F6C] focus-visible:ring-[#0B4F6C]/20"
                       {...field}
                     />
@@ -120,15 +155,6 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="font-[family-name:var(--font-inter)] text-xs text-[#0B4F6C] hover:underline underline-offset-4"
-              >
-                Forgot password?
-              </Link>
-            </div>
 
             <div className="pt-2">
               <Button
@@ -139,10 +165,10 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing In...
+                    Resetting...
                   </>
                 ) : (
-                  "Sign In"
+                  "Reset Password"
                 )}
               </Button>
             </div>
@@ -152,15 +178,23 @@ export default function LoginPage() {
 
       <CardFooter className="justify-center pb-8 px-8">
         <p className="font-[family-name:var(--font-inter)] text-sm text-[#333333]/60">
-          Don&apos;t have an account?{" "}
+          Remember your password?{" "}
           <Link
-            href="/signup"
+            href="/login"
             className="text-[#0B4F6C] font-medium hover:underline underline-offset-4"
           >
-            Sign up
+            Sign in
           </Link>
         </p>
       </CardFooter>
     </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
