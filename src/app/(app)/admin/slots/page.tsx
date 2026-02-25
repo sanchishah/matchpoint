@@ -37,6 +37,7 @@ export default function AdminSlotsPage() {
   const [form, setForm] = useState({
     clubId: "", startTime: "", durationMins: 60, format: "DOUBLES" as string,
     totalCostCents: 1000, skillLevel: 3, ageBracket: "AGE_25_34", notes: "",
+    repeatWeeks: 0,
   });
 
   useEffect(() => {
@@ -170,7 +171,24 @@ export default function AdminSlotsPage() {
                 <Input type="number" value={form.totalCostCents} onChange={(e) => setForm({ ...form, totalCostCents: parseInt(e.target.value) || 0 })} className="border-[#E2E8F0] rounded-xl mt-1" />
                 <p className="text-xs text-[#64748B] mt-1">500 = $5.00, 1000 = $10.00</p>
               </div>
-              <Button onClick={handleCreate} className="w-full bg-[#0B4F6C] text-white rounded-lg">Create Slot</Button>
+              <div>
+                <Label className="text-xs uppercase tracking-wider text-[#64748B]">Repeat Weekly</Label>
+                <Select value={String(form.repeatWeeks)} onValueChange={(v) => setForm({ ...form, repeatWeeks: parseInt(v) })}>
+                  <SelectTrigger className="border-[#E2E8F0] rounded-xl mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">No repeat</SelectItem>
+                    <SelectItem value="4">4 weeks</SelectItem>
+                    <SelectItem value="8">8 weeks</SelectItem>
+                    <SelectItem value="12">12 weeks</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.repeatWeeks > 0 && (
+                  <p className="text-xs text-[#64748B] mt-1">Creates {form.repeatWeeks} slots, one per week</p>
+                )}
+              </div>
+              <Button onClick={handleCreate} className="w-full bg-[#0B4F6C] text-white rounded-lg">
+                {form.repeatWeeks > 0 ? `Create ${form.repeatWeeks} Slots` : "Create Slot"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

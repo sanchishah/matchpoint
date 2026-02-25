@@ -44,6 +44,14 @@ export async function POST(
     );
   }
 
+  // Check email is verified
+  if (!user?.emailVerified) {
+    return NextResponse.json(
+      { error: "Please verify your email before joining games." },
+      { status: 403 }
+    );
+  }
+
   // Check strikes
   const strikeCount = await prisma.strike.count({ where: { userId } });
   if (strikeCount >= 3) {

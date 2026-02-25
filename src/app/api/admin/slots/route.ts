@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { slotSchema } from "@/lib/validations";
+import { sendEmail } from "@/lib/email";
+import { waitlistNotifyEmailHtml, waitlistNotifyEmailText } from "@/lib/emails/waitlist-notify";
+import { distanceMiles } from "@/lib/constants";
+import { format } from "date-fns";
 
 async function requireAdmin() {
   const session = await auth();
@@ -44,6 +49,38 @@ export async function POST(req: Request) {
 
   const requiredPlayers = parsed.data.format === "SINGLES" ? 2 : 4;
 
+  // Handle recurring slots
+  const repeatWeeks = body.repeatWeeks ? parseInt(body.repeatWeeks) : 0;
+
+  if (repeatWeeks > 0) {
+    const recurringGroupId = randomBytes(8).toString("hex");
+    const slots = [];
+
+    for (let i = 0; i < repeatWeeks; i++) {
+      const slotStart = new Date(startTime);
+      slotStart.setDate(slotStart.getDate() + i * 7);
+      const slotLock = new Date(slotStart);
+      slotLock.setHours(slotLock.getHours() - 8);
+
+      slots.push({
+        clubId: parsed.data.clubId,
+        startTime: slotStart,
+        durationMins: parsed.data.durationMins,
+        format: parsed.data.format as "SINGLES" | "DOUBLES",
+        requiredPlayers,
+        totalCostCents: parsed.data.totalCostCents,
+        skillLevel: parsed.data.skillLevel,
+        ageBracket: parsed.data.ageBracket as "AGE_18_24" | "AGE_25_34" | "AGE_35_44" | "AGE_45_54" | "AGE_55_64" | "AGE_65_PLUS",
+        lockTime: slotLock,
+        notes: parsed.data.notes || null,
+        recurringGroupId,
+      });
+    }
+
+    const result = await prisma.slot.createMany({ data: slots });
+    return NextResponse.json({ created: result.count, recurringGroupId });
+  }
+
   const slot = await prisma.slot.create({
     data: {
       clubId: parsed.data.clubId,
@@ -57,6 +94,64 @@ export async function POST(req: Request) {
       lockTime,
       notes: parsed.data.notes,
     },
+    include: { club: true },
   });
+
+  // Fire-and-forget: notify matching users about the new slot
+  notifyMatchingUsers(slot).catch(() => {});
+
   return NextResponse.json(slot);
+}
+
+async function notifyMatchingUsers(slot: {
+  id: string;
+  skillLevel: number;
+  ageBracket: string;
+  startTime: Date;
+  club: { name: string; lat: number; lng: number };
+}) {
+  const APP_BASE_URL = process.env.APP_BASE_URL || "http://localhost:3000";
+
+  // Find users matching skill level and age bracket who have a profile with location
+  const matchingProfiles = await prisma.profile.findMany({
+    where: {
+      skillLevel: slot.skillLevel,
+      ageBracket: slot.ageBracket as "AGE_18_24" | "AGE_25_34" | "AGE_35_44" | "AGE_45_54" | "AGE_55_64" | "AGE_65_PLUS",
+      lat: { not: null },
+      lng: { not: null },
+    },
+    include: { user: { select: { id: true, email: true, emailVerified: true, status: true } } },
+  });
+
+  const dateStr = format(slot.startTime, "EEEE, MMM d 'at' h:mm a");
+  const bookUrl = `${APP_BASE_URL}/book`;
+
+  for (const profile of matchingProfiles) {
+    // Skip restricted or unverified users
+    if (profile.user.status !== "ACTIVE") continue;
+
+    // Check distance
+    if (profile.lat && profile.lng) {
+      const dist = distanceMiles(profile.lat, profile.lng, slot.club.lat, slot.club.lng);
+      if (dist > profile.radiusMiles) continue;
+    }
+
+    const firstName = profile.name.split(" ")[0];
+
+    sendEmail({
+      to: profile.user.email,
+      subject: `New game at ${slot.club.name} — matches your level!`,
+      html: waitlistNotifyEmailHtml({ firstName, clubName: slot.club.name, dateStr, bookUrl }),
+      text: waitlistNotifyEmailText({ firstName, clubName: slot.club.name, dateStr, bookUrl }),
+    }).catch(() => {});
+
+    await prisma.notification.create({
+      data: {
+        userId: profile.user.id,
+        type: "NEW_SLOT_MATCH",
+        title: "New game available!",
+        body: `A new game at ${slot.club.name} on ${dateStr} matches your preferences.`,
+      },
+    });
+  }
 }

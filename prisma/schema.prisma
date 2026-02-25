@@ -38,6 +38,12 @@ model User {
   notifications     Notification[]
   favoriteClubs     FavoriteClub[]
   passwordResetTokens PasswordResetToken[]
+  referralCode      String?       @unique
+  referredByUserId  String?
+  referralCredits   Int           @default(0)
+  referralsGiven    Referral[]    @relation("ReferrerReferrals")
+  referralsReceived Referral[]    @relation("RefereeReferrals")
+  pushSubscriptions PushSubscription[]
 }
 
 model Account {
@@ -156,6 +162,7 @@ model Slot {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
+  recurringGroupId String?    // links slots from the same recurring series
   club         Club              @relation(fields: [clubId], references: [id], onDelete: Cascade)
   participants SlotParticipant[]
   game         Game?
@@ -315,6 +322,34 @@ model ContactMessage {
   email     String
   message   String
   createdAt DateTime @default(now())
+}
+
+// ─── Referrals ─────────────────────────────────────
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String
+  refereeId  String
+  credited   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("RefereeReferrals", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, refereeId])
+}
+
+// ─── Push Subscriptions ────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── Enums ──────────────────────────────────────────

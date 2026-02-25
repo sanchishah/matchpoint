@@ -5,10 +5,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { usePushNotifications } from "@/lib/use-push";
 
 interface ProfileData {
   name: string;
@@ -37,6 +38,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<GameData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -153,6 +155,52 @@ export default function DashboardPage() {
             <p className="text-3xl font-light text-[#0A0A0A]">{profile?.strikeCount ?? 0} / 3</p>
             <p className="text-xs text-[#64748B] mt-2">No-show strikes. 3 strikes = restricted.</p>
           </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <Link href="/dashboard/stats">
+            <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <BarChart3 className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Your Stats</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/referrals">
+            <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <Gift className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Refer Friends</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
+          {pushSupported && (
+            <Card className="border-[#E2E8F0] rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Push Notifications</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto rounded-lg border-[#E2E8F0] text-xs"
+                  onClick={() => pushSubscribed ? pushUnsubscribe() : pushSubscribe()}
+                >
+                  {pushSubscribed ? "Disable" : "Enable"}
+                </Button>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Upcoming Games */}

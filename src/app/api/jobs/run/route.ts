@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendEmail, reminderEmail, chatOpenEmail } from "@/lib/email";
+import { sendPushToUser } from "@/lib/push";
 import { format } from "date-fns";
 
 // This endpoint can be triggered manually in dev or by Vercel Cron in production
@@ -38,6 +39,11 @@ export async function POST() {
           body: `Your game at ${game.slot.club.name} is in 24 hours.`,
         },
       });
+      sendPushToUser(p.userId, {
+        title: "Game Tomorrow!",
+        body: `Your game at ${game.slot.club.name} is in 24 hours.`,
+        url: `/games/${game.id}`,
+      }).catch(() => {});
     }
     results.push(`24h reminder sent for game ${game.id}`);
   }
@@ -71,6 +77,11 @@ export async function POST() {
           body: `Your game at ${game.slot.club.name} starts at ${dateStr}.`,
         },
       });
+      sendPushToUser(p.userId, {
+        title: "Game in 2 Hours!",
+        body: `Your game at ${game.slot.club.name} starts at ${dateStr}.`,
+        url: `/games/${game.id}`,
+      }).catch(() => {});
     }
     results.push(`2h reminder sent for game ${game.id}`);
   }
@@ -103,6 +114,11 @@ export async function POST() {
           body: `The game chat for ${game.slot.club.name} is now open. Coordinate with your fellow players!`,
         },
       });
+      sendPushToUser(p.userId, {
+        title: "Chat is Open!",
+        body: `Game chat for ${game.slot.club.name} is now open.`,
+        url: `/games/${game.id}`,
+      }).catch(() => {});
     }
     results.push(`Chat open notification sent for game ${game.id}`);
   }
