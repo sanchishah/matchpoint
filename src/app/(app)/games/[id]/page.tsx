@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   Calendar, MapPin, Clock, Users, Send, Star, MessageCircle, Award, Loader2, CreditCard,
+  Download, ChevronDown, Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -105,6 +106,16 @@ interface GameDetail {
   payments: { amountCents: number; status: string }[];
   ratings: { rateeId: string; stars: number; feltLevel: string }[];
   messages: ChatMessage[];
+  score: { team1Score: number; team2Score: number } | null;
+}
+
+interface RecapData {
+  score: { team1Score: number; team2Score: number } | null;
+  mvp: { userId: string; name: string; avgRating: number } | null;
+  avgRating: number | null;
+  attendanceRate: number | null;
+  totalParticipants: number;
+  summary: string;
 }
 
 export default function GameDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -126,6 +137,11 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const [showPayment, setShowPayment] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
+  const [team1Score, setTeam1Score] = useState("");
+  const [team2Score, setTeam2Score] = useState("");
+  const [submittingScore, setSubmittingScore] = useState(false);
+  const [recap, setRecap] = useState<RecapData | null>(null);
+  const [showCalendarMenu, setShowCalendarMenu] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatTopRef = useRef<HTMLDivElement>(null);
   const messageIdsRef = useRef(new Set<string>());
@@ -282,6 +298,60 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  // Fetch recap for completed games
+  useEffect(() => {
+    if (!game || game.status !== "COMPLETED") return;
+    fetch(`/api/games/${id}/recap`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => setRecap(data))
+      .catch(() => {});
+  }, [game?.status, id]);
+
+  const submitScore = async () => {
+    const t1 = parseInt(team1Score);
+    const t2 = parseInt(team2Score);
+    if (isNaN(t1) || isNaN(t2)) {
+      toast.error("Please enter valid scores");
+      return;
+    }
+    setSubmittingScore(true);
+    try {
+      const res = await fetch(`/api/games/${id}/score`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team1Score: t1, team2Score: t2 }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error);
+      } else {
+        toast.success("Score submitted");
+        fetchGame();
+      }
+    } catch {
+      toast.error("Failed to submit score");
+    } finally {
+      setSubmittingScore(false);
+    }
+  };
+
+  const downloadCalendar = () => {
+    window.open(`/api/games/${id}/calendar`, "_blank");
+    setShowCalendarMenu(false);
+  };
+
+  const openGoogleCalendar = () => {
+    if (!game) return;
+    const start = new Date(game.startTime).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const end = new Date(game.endTime).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const formatLabel = game.slot.format === "SINGLES" ? "Singles" : "Doubles";
+    const title = encodeURIComponent(`Matchpoint ${formatLabel} — ${game.slot.club.name}`);
+    const location = encodeURIComponent(`${game.slot.club.address}, ${game.slot.club.city}`);
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&location=${location}`;
+    window.open(url, "_blank");
+    setShowCalendarMenu(false);
+  };
+
   if (loading || !game) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -333,6 +403,37 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
               {game.status}
             </Badge>
           </div>
+          {/* Add to Calendar — confirmed upcoming games only */}
+          {game.status === "CONFIRMED" && !isPast && (
+            <div className="relative inline-block mt-3 mr-3">
+              <Button
+                variant="outline"
+                className="border-[#E2E8F0] text-[#333333] rounded-full text-sm"
+                onClick={() => setShowCalendarMenu(!showCalendarMenu)}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Add to Calendar
+                <ChevronDown className="w-3.5 h-3.5 ml-1" />
+              </Button>
+              {showCalendarMenu && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-10 py-1 min-w-[180px]">
+                  <button
+                    onClick={downloadCalendar}
+                    className="w-full text-left px-4 py-2 text-sm text-[#333333] hover:bg-[#F8F8F8]"
+                  >
+                    Download .ics
+                  </button>
+                  <button
+                    onClick={openGoogleCalendar}
+                    className="w-full text-left px-4 py-2 text-sm text-[#333333] hover:bg-[#F8F8F8]"
+                  >
+                    Google Calendar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {game.payments.length > 0 && (
             <p className="text-sm text-[#64748B] mt-2">
               Your share: ${(game.payments[0].amountCents / 100).toFixed(2)} · {game.payments[0].status}
@@ -374,6 +475,107 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
             </Card>
           )}
         </div>
+
+        {/* Score + Recap for completed games */}
+        {isPast && game.status === "COMPLETED" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {/* Score Card */}
+            <Card className="border-[#E2E8F0] rounded-xl p-6">
+              <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A] mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-[#0B4F6C]" /> Score
+              </h3>
+              {game.score ? (
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-4">
+                    <div>
+                      <p className="text-xs text-[#64748B] mb-1">Team 1</p>
+                      <p className="text-4xl font-light text-[#0A0A0A]">{game.score.team1Score}</p>
+                    </div>
+                    <span className="text-xl text-[#64748B]">—</span>
+                    <div>
+                      <p className="text-xs text-[#64748B] mb-1">Team 2</p>
+                      <p className="text-4xl font-light text-[#0A0A0A]">{game.score.team2Score}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-[#64748B]">No score submitted yet.</p>
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <Label className="text-xs text-[#64748B]">Team 1</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="99"
+                        value={team1Score}
+                        onChange={(e) => setTeam1Score(e.target.value)}
+                        className="border-[#E2E8F0] rounded-xl h-10 w-20"
+                      />
+                    </div>
+                    <span className="text-[#64748B] mt-5">—</span>
+                    <div>
+                      <Label className="text-xs text-[#64748B]">Team 2</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="99"
+                        value={team2Score}
+                        onChange={(e) => setTeam2Score(e.target.value)}
+                        className="border-[#E2E8F0] rounded-xl h-10 w-20"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full text-sm"
+                    onClick={submitScore}
+                    disabled={submittingScore}
+                  >
+                    {submittingScore ? "Submitting..." : "Submit Score"}
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+            {/* Recap Card */}
+            {recap && (
+              <Card className="border-[#E2E8F0] rounded-xl p-6">
+                <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A] mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#0B4F6C]" /> Game Recap
+                </h3>
+                <div className="space-y-3">
+                  {recap.mvp && (
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-[#0B4F6C]" />
+                      <span className="text-sm text-[#333333]">
+                        MVP: <strong>{recap.mvp.name}</strong> ({recap.mvp.avgRating} avg)
+                      </span>
+                    </div>
+                  )}
+                  {recap.avgRating !== null && (
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-[#0B4F6C]" />
+                      <span className="text-sm text-[#333333]">
+                        Avg Rating: <strong>{recap.avgRating}</strong>
+                      </span>
+                    </div>
+                  )}
+                  {recap.attendanceRate !== null && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-[#0B4F6C]" />
+                      <span className="text-sm text-[#333333]">
+                        Attendance: <strong>{recap.attendanceRate}%</strong>
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-sm text-[#64748B] pt-2 border-t border-[#E2E8F0]">
+                    {recap.summary}
+                  </p>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Participants + Ratings */}

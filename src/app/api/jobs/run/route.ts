@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendEmail, reminderEmail, chatOpenEmail } from "@/lib/email";
+import { sendEmail, reminderEmail, chatOpenEmail, shouldSendEmail } from "@/lib/email";
 import { sendPushToUser } from "@/lib/push";
 import { format } from "date-fns";
 
@@ -28,8 +28,10 @@ export async function POST() {
     for (const p of game.participants) {
       const name = p.user.profile?.name || p.user.name || "Player";
       const dateStr = format(game.startTime, "EEEE, MMM d 'at' h:mm a");
-      const email = reminderEmail(name, game.slot.club.name, dateStr, 24);
-      await sendEmail({ to: p.user.email, ...email });
+      if (await shouldSendEmail(p.userId, "reminders")) {
+        const email = reminderEmail(name, game.slot.club.name, dateStr, 24);
+        await sendEmail({ to: p.user.email, ...email });
+      }
 
       await prisma.notification.create({
         data: {
@@ -66,8 +68,10 @@ export async function POST() {
     for (const p of game.participants) {
       const name = p.user.profile?.name || p.user.name || "Player";
       const dateStr = format(game.startTime, "h:mm a");
-      const email = reminderEmail(name, game.slot.club.name, dateStr, 2);
-      await sendEmail({ to: p.user.email, ...email });
+      if (await shouldSendEmail(p.userId, "reminders")) {
+        const email = reminderEmail(name, game.slot.club.name, dateStr, 2);
+        await sendEmail({ to: p.user.email, ...email });
+      }
 
       await prisma.notification.create({
         data: {
@@ -103,8 +107,10 @@ export async function POST() {
   for (const game of gamesChatOpen) {
     for (const p of game.participants) {
       const name = p.user.profile?.name || p.user.name || "Player";
-      const email = chatOpenEmail(name, game.slot.club.name);
-      await sendEmail({ to: p.user.email, ...email });
+      if (await shouldSendEmail(p.userId, "chatNotifications")) {
+        const email = chatOpenEmail(name, game.slot.club.name);
+        await sendEmail({ to: p.user.email, ...email });
+      }
 
       await prisma.notification.create({
         data: {

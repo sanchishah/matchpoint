@@ -61,3 +61,16 @@ export const ratingSchema = z.object({
 export const messageSchema = z.object({
   body: z.string().min(1, "Message cannot be empty").max(500),
 });
+
+export const emailPreferenceSchema = z.object({
+  gameConfirmations: z.boolean().optional(),
+  reminders: z.boolean().optional(),
+  chatNotifications: z.boolean().optional(),
+  marketing: z.boolean().optional(),
+  referralUpdates: z.boolean().optional(),
+});
+
+export const gameScoreSchema = z.object({
+  team1Score: z.number().int().min(0).max(99),
+  team2Score: z.number().int().min(0).max(99),
+});

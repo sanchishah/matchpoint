@@ -33,6 +33,7 @@ import { NotificationBell } from "@/components/notification-bell";
 const navLinks = [
   { href: "/home", label: "Home" },
   { href: "/book", label: "Book" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/home#how-it-works", label: "How It Works" },
 ];
 

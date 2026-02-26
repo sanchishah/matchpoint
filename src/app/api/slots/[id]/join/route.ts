@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { confirmGame } from "@/lib/game-service";
-import { sendEmail, spotReservedEmail } from "@/lib/email";
+import { sendEmail, spotReservedEmail, shouldSendEmail } from "@/lib/email";
 import { format } from "date-fns";
 import { checkRateLimit, JOIN_LIMIT } from "@/lib/rate-limit";
 
@@ -138,14 +138,17 @@ export async function POST(
     });
   }
 
-  // Send reservation email
+  // Send reservation email (respects preferences)
   const dateStr = format(slot.startTime, "EEEE, MMM d 'at' h:mm a");
-  const emailData = spotReservedEmail(
-    profile.name,
-    slot.club.name,
-    dateStr
-  );
-  sendEmail({ to: user!.email, ...emailData });
+  const wantsEmail = await shouldSendEmail(userId, "gameConfirmations");
+  if (wantsEmail) {
+    const emailData = spotReservedEmail(
+      profile.name,
+      slot.club.name,
+      dateStr
+    );
+    sendEmail({ to: user!.email, ...emailData });
+  }
 
   // Create notification
   await prisma.notification.create({

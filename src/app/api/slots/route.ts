@@ -34,6 +34,10 @@ export async function GET(req: NextRequest) {
   const ageBracketRaw = searchParams.get("ageBracket");
   const ageBracket = ageBracketRaw && ageBracketRaw !== "all" ? ageBracketRaw : null;
   const clubId = searchParams.get("clubId") || null;
+  const formatFilter = searchParams.get("format") || null;
+  const dayOfWeekRaw = searchParams.get("dayOfWeek");
+  const dayOfWeek = dayOfWeekRaw !== null && dayOfWeekRaw !== "" ? parseInt(dayOfWeekRaw) : null;
+  const timeOfDay = searchParams.get("timeOfDay") || null;
 
   const where: Record<string, unknown> = {
     status: { in: ["OPEN", "PENDING_FILL"] },
@@ -50,6 +54,7 @@ export async function GET(req: NextRequest) {
   if (skillLevel) where.skillLevel = skillLevel;
   if (ageBracket) where.ageBracket = ageBracket;
   if (clubId) where.clubId = clubId;
+  if (formatFilter) where.format = formatFilter;
 
   const slots = await prisma.slot.findMany({
     where: where as any,
@@ -67,9 +72,25 @@ export async function GET(req: NextRequest) {
   // Filter by distance if lat/lng provided
   let filtered = slots;
   if (lat !== null && lng !== null) {
-    filtered = slots.filter((slot) => {
+    filtered = filtered.filter((slot) => {
       const dist = distanceMiles(lat, lng, slot.club.lat, slot.club.lng);
       return dist <= radius;
+    });
+  }
+
+  // Filter by day of week (0=Sunday, 6=Saturday) — post-query
+  if (dayOfWeek !== null && !isNaN(dayOfWeek)) {
+    filtered = filtered.filter((slot) => new Date(slot.startTime).getDay() === dayOfWeek);
+  }
+
+  // Filter by time of day — post-query
+  if (timeOfDay) {
+    filtered = filtered.filter((slot) => {
+      const hour = new Date(slot.startTime).getHours();
+      if (timeOfDay === "morning") return hour >= 6 && hour < 12;
+      if (timeOfDay === "afternoon") return hour >= 12 && hour < 17;
+      if (timeOfDay === "evening") return hour >= 17 && hour < 22;
+      return true;
     });
   }
 
@@ -82,6 +103,12 @@ export async function GET(req: NextRequest) {
     const userWaitlisted = session?.user?.id
       ? slot.participants.some((p) => p.userId === session.user.id && p.status === "WAITLISTED")
       : false;
+
+    // Calculate waitlist position
+    const waitlisted = slot.participants.filter((p) => p.status === "WAITLISTED");
+    const waitlistPosition = session?.user?.id && userWaitlisted
+      ? waitlisted.findIndex((p) => p.userId === session.user.id) + 1
+      : null;
 
     return {
       id: slot.id,
@@ -109,6 +136,7 @@ export async function GET(req: NextRequest) {
       spotsLeft: slot.requiredPlayers - joinedCount,
       userJoined,
       userWaitlisted,
+      waitlistPosition,
     };
   });
 

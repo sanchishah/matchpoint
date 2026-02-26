@@ -26,6 +26,7 @@
  */
 
 import { Resend } from "resend";
+import { prisma } from "@/lib/db";
 
 // ── Provider interface ───────────────────────────────────
 
@@ -130,6 +131,16 @@ export async function sendEmail({
   } catch (error) {
     console.error("Failed to send email:", error);
   }
+}
+
+// ── Email preference check ───────────────────────────────
+
+export type EmailType = "gameConfirmations" | "reminders" | "chatNotifications" | "marketing" | "referralUpdates";
+
+export async function shouldSendEmail(userId: string, type: EmailType): Promise<boolean> {
+  const pref = await prisma.emailPreference.findUnique({ where: { userId } });
+  if (!pref) return true; // default: all enabled
+  return pref[type];
 }
 
 // ── Existing template helpers (unchanged) ────────────────

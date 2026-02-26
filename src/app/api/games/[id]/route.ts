@@ -38,6 +38,7 @@ export async function GET(
         where: { raterId: session.user.id },
         select: { rateeId: true, stars: true, feltLevel: true },
       },
+      score: true,
       messages: {
         include: {
           user: {

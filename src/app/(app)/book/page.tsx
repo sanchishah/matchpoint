@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
-import { Heart, Users, Clock, MapPin, Filter } from "lucide-react";
+import { Heart, Users, Clock, MapPin, Filter, Map, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,10 +18,14 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { SKILL_LEVELS, AGE_BRACKETS } from "@/lib/constants";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+
+const SlotMap = dynamic(() => import("@/components/slot-map"), { ssr: false });
 
 interface SlotData {
   id: string;
-  club: { id: string; name: string; address: string; city: string };
+  club: { id: string; name: string; address: string; city: string; lat: number; lng: number };
   startTime: string;
   durationMins: number;
   format: string;
@@ -67,6 +71,11 @@ export default function BookPage() {
   const [joining, setJoining] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recsLoading, setRecsLoading] = useState(false);
+  const [dayOfWeek, setDayOfWeek] = useState("");
+  const [timeOfDay, setTimeOfDay] = useState("");
+  const [formatFilter, setFormatFilter] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const fetchSlots = useCallback(async () => {
     setLoading(true);
@@ -76,6 +85,9 @@ export default function BookPage() {
     if (date) params.set("date", date);
     if (skillFilter) params.set("skillLevel", skillFilter);
     if (ageFilter) params.set("ageBracket", ageFilter);
+    if (formatFilter) params.set("format", formatFilter);
+    if (dayOfWeek) params.set("dayOfWeek", dayOfWeek);
+    if (timeOfDay) params.set("timeOfDay", timeOfDay);
 
     try {
       const res = await fetch(`/api/slots?${params}`);
@@ -86,7 +98,7 @@ export default function BookPage() {
     } finally {
       setLoading(false);
     }
-  }, [zip, radius, date, skillFilter, ageFilter]);
+  }, [zip, radius, date, skillFilter, ageFilter, formatFilter, dayOfWeek, timeOfDay]);
 
   const fetchFavorites = useCallback(async () => {
     if (!session) return;
@@ -337,7 +349,84 @@ export default function BookPage() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end mt-3">
+          {/* More Filters */}
+          <div className="col-span-full">
+            <button
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+              className="text-sm text-[#0B4F6C] hover:underline flex items-center gap-1"
+            >
+              <Filter className="w-3.5 h-3.5" />
+              {showMoreFilters ? "Hide" : "More"} Filters
+            </button>
+            {showMoreFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Day of Week</Label>
+                  <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
+                      <SelectValue placeholder="Any" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any</SelectItem>
+                      <SelectItem value="0">Sunday</SelectItem>
+                      <SelectItem value="1">Monday</SelectItem>
+                      <SelectItem value="2">Tuesday</SelectItem>
+                      <SelectItem value="3">Wednesday</SelectItem>
+                      <SelectItem value="4">Thursday</SelectItem>
+                      <SelectItem value="5">Friday</SelectItem>
+                      <SelectItem value="6">Saturday</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Time of Day</Label>
+                  <Select value={timeOfDay} onValueChange={setTimeOfDay}>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
+                      <SelectValue placeholder="Any" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any</SelectItem>
+                      <SelectItem value="morning">Morning (6am-12pm)</SelectItem>
+                      <SelectItem value="afternoon">Afternoon (12pm-5pm)</SelectItem>
+                      <SelectItem value="evening">Evening (5pm-10pm)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Format</Label>
+                  <Select value={formatFilter} onValueChange={setFormatFilter}>
+                    <SelectTrigger className="border-[#E2E8F0] rounded-xl h-11">
+                      <SelectValue placeholder="Any" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any</SelectItem>
+                      <SelectItem value="SINGLES">Singles</SelectItem>
+                      <SelectItem value="DOUBLES">Doubles</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-between items-center mt-3">
+            <div className="flex gap-1 bg-[#F1F5F9] rounded-full p-1">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  viewMode === "list" ? "bg-white text-[#0B4F6C] shadow-sm" : "text-[#64748B]"
+                }`}
+              >
+                <List className="w-4 h-4" /> List
+              </button>
+              <button
+                onClick={() => setViewMode("map")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  viewMode === "map" ? "bg-white text-[#0B4F6C] shadow-sm" : "text-[#64748B]"
+                }`}
+              >
+                <Map className="w-4 h-4" /> Map
+              </button>
+            </div>
             <Button
               onClick={fetchSlots}
               className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full px-6"
@@ -347,7 +436,7 @@ export default function BookPage() {
           </div>
         </div>
 
-        {/* Slots Grid */}
+        {/* Slots Grid / Map */}
         {loading ? (
           <div className="text-center py-20 text-[#64748B]">Loading available courts...</div>
         ) : sortedSlots.length === 0 ? (
@@ -357,6 +446,17 @@ export default function BookPage() {
               Try expanding your radius or changing your preferences.
             </p>
           </div>
+        ) : viewMode === "map" ? (
+          <SlotMap
+            slots={sortedSlots.map((s) => ({
+              id: s.id,
+              club: s.club,
+              startTime: s.startTime,
+              format: s.format,
+              perPersonCents: s.perPersonCents,
+              spotsLeft: s.spotsLeft,
+            }))}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedSlots.map((slot) => (
@@ -366,9 +466,11 @@ export default function BookPage() {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A]">
-                      {slot.club.name}
-                    </h3>
+                    <Link href={`/clubs/${slot.club.id}`}>
+                      <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A] hover:text-[#0B4F6C] transition-colors">
+                        {slot.club.name}
+                      </h3>
+                    </Link>
                     <p className="text-sm text-[#64748B] flex items-center gap-1 mt-1">
                       <MapPin className="w-3.5 h-3.5" /> {slot.club.city}
                     </p>

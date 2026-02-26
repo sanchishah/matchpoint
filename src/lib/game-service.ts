@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
-import { sendEmail, gameConfirmedEmail } from "@/lib/email";
+import { sendEmail, gameConfirmedEmail, shouldSendEmail } from "@/lib/email";
 import { formatCents } from "@/lib/constants";
 import { format } from "date-fns";
 
@@ -74,15 +74,18 @@ export async function confirmGame(slotId: string) {
 
       confirmedParticipants.push(participant.userId);
 
-      // Send confirmation email
+      // Send confirmation email (respects preferences)
       const dateStr = format(slot.startTime, "EEEE, MMM d 'at' h:mm a");
-      const emailData = gameConfirmedEmail(
-        participant.user.profile?.name || participant.user.name || "Player",
-        slot.club.name,
-        dateStr,
-        formatCents(perPersonCents)
-      );
-      sendEmail({ to: participant.user.email, ...emailData });
+      const wantsEmail = await shouldSendEmail(participant.userId, "gameConfirmations");
+      if (wantsEmail) {
+        const emailData = gameConfirmedEmail(
+          participant.user.profile?.name || participant.user.name || "Player",
+          slot.club.name,
+          dateStr,
+          formatCents(perPersonCents)
+        );
+        sendEmail({ to: participant.user.email, ...emailData });
+      }
 
       // Create notification prompting user to pay
       await prisma.notification.create({

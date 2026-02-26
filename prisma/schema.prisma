@@ -43,7 +43,10 @@ model User {
   referralCredits   Int           @default(0)
   referralsGiven    Referral[]    @relation("ReferrerReferrals")
   referralsReceived Referral[]    @relation("RefereeReferrals")
+  avatarUrl         String?
   pushSubscriptions PushSubscription[]
+  emailPreference   EmailPreference?
+  scoresSubmitted   GameScore[]
 }
 
 model Account {
@@ -199,6 +202,7 @@ model Game {
   messages     Message[]
   ratings      Rating[]
   attendances  Attendance[]
+  score        GameScore?
 }
 
 model GameParticipant {
@@ -210,6 +214,7 @@ model GameParticipant {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([gameId, userId])
+  @@index([userId])
 }
 
 // ─── Payments ───────────────────────────────────────
@@ -271,6 +276,7 @@ model Rating {
   ratee User @relation("RateeRatings", fields: [rateeId], references: [id], onDelete: Cascade)
 
   @@unique([gameId, raterId, rateeId])
+  @@index([rateeId])
 }
 
 // ─── Attendance & Strikes ───────────────────────────
@@ -350,6 +356,34 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Email Preferences ─────────────────────────────
+
+model EmailPreference {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  gameConfirmations  Boolean @default(true)
+  reminders          Boolean @default(true)
+  chatNotifications  Boolean @default(true)
+  marketing          Boolean @default(true)
+  referralUpdates    Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Game Scores ───────────────────────────────────
+
+model GameScore {
+  id            String @id @default(cuid())
+  gameId        String @unique
+  team1Score    Int
+  team2Score    Int
+  submittedById String
+  createdAt     DateTime @default(now())
+
+  game        Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  submittedBy User @relation(fields: [submittedById], references: [id], onDelete: Cascade)
 }
 
 // ─── Enums ──────────────────────────────────────────

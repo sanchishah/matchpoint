@@ -16,6 +16,7 @@ export async function GET() {
     gameParticipants,
     ratingsReceived,
     profile,
+    gameScores,
   ] = await Promise.all([
     prisma.gameParticipant.count({ where: { userId } }),
     prisma.gameParticipant.findMany({
@@ -23,6 +24,7 @@ export async function GET() {
       select: {
         game: {
           select: {
+            id: true,
             startTime: true,
             slot: {
               select: {
@@ -40,6 +42,19 @@ export async function GET() {
     prisma.profile.findUnique({
       where: { userId },
       select: { name: true },
+    }),
+    // Get all scores for games the user participated in
+    prisma.gameScore.findMany({
+      where: {
+        game: {
+          participants: { some: { userId } },
+        },
+      },
+      select: {
+        gameId: true,
+        team1Score: true,
+        team2Score: true,
+      },
     }),
   ]);
 
@@ -100,6 +115,17 @@ export async function GET() {
       ? Object.entries(clubCounts).sort((a, b) => b[1] - a[1])[0][0]
       : null;
 
+  // Win/loss record based on scores
+  let gamesWon = 0;
+  let gamesLost = 0;
+  for (const score of gameScores) {
+    if (score.team1Score > score.team2Score) {
+      gamesWon++;
+    } else if (score.team2Score > score.team1Score) {
+      gamesLost++;
+    }
+  }
+
   return NextResponse.json({
     playerName: profile?.name || session.user.name || "Player",
     totalGames,
@@ -108,7 +134,8 @@ export async function GET() {
     ratingBreakdown,
     feltLevelBreakdown,
     gamesByMonth,
-    gamesWon: 0,
+    gamesWon,
+    gamesLost,
     favoriteClub,
   });
 }

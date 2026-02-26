@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift, CreditCard, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -178,6 +178,30 @@ export default function DashboardPage() {
                   <Gift className="w-4 h-4 text-[#0B4F6C]" />
                 </div>
                 <span className="text-sm text-[#333333] font-medium">Refer Friends</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/payments">
+            <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <CreditCard className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Payment History</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/settings">
+            <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <Settings className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Settings</span>
                 <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
               </div>
             </Card>
