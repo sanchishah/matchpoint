@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift, CreditCard, Settings } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift, CreditCard, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,11 +32,20 @@ interface GameData {
   participants: { userId: string }[];
 }
 
+interface FriendGame {
+  id: string;
+  startTime: string;
+  format: string;
+  club: { id: string; name: string; city: string };
+  friends: { id: string; name: string }[];
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<GameData[]>([]);
+  const [friendGames, setFriendGames] = useState<FriendGame[]>([]);
   const [loading, setLoading] = useState(true);
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
 
@@ -51,9 +60,10 @@ export default function DashboardPage() {
 
     const fetchData = async () => {
       try {
-        const [profileRes, gamesRes] = await Promise.all([
+        const [profileRes, gamesRes, friendGamesRes] = await Promise.all([
           fetch("/api/profile"),
           fetch("/api/games"),
+          fetch("/api/friends/games"),
         ]);
 
         if (profileRes.ok) {
@@ -64,6 +74,11 @@ export default function DashboardPage() {
         if (gamesRes.ok) {
           const g = await gamesRes.json();
           setGames(g);
+        }
+
+        if (friendGamesRes.ok) {
+          const fg = await friendGamesRes.json();
+          setFriendGames(fg);
         }
       } catch { /* ignore */ }
       finally { setLoading(false); }
@@ -159,6 +174,18 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <Link href="/friends">
+            <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <Users className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Friends</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
           <Link href="/dashboard/stats">
             <Card className="border-[#E2E8F0] rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
               <div className="flex items-center gap-3">
@@ -226,6 +253,55 @@ export default function DashboardPage() {
             </Card>
           )}
         </div>
+
+        {/* Friends' Games */}
+        {friendGames.length > 0 && (
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="font-[family-name:var(--font-heading)] text-2xl text-[#0A0A0A]">
+                Friends&apos; Games
+              </h2>
+              <Link href="/friends" className="text-sm text-[#0B4F6C] flex items-center gap-1 hover:underline">
+                All Friends <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {friendGames.slice(0, 3).map((game) => (
+                <Link key={game.id} href={`/games/${game.id}`}>
+                  <Card className="border-[#E2E8F0] rounded-xl p-5 hover:shadow-sm transition-shadow cursor-pointer">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-[family-name:var(--font-heading)] text-lg text-[#0A0A0A]">
+                          {game.club.name}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm text-[#64748B] mt-1">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {format(new Date(game.startTime), "EEE, MMM d · h:mm a")}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {game.club.city}
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#0B4F6C] mt-1.5">
+                          <Users className="w-3 h-3 inline mr-1" />
+                          {game.friends.map((f) => f.name).join(", ")}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full text-xs">
+                          {game.format === "SINGLES" ? "Singles" : "Doubles"}
+                        </Badge>
+                        <ChevronRight className="w-5 h-5 text-[#64748B]" />
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Upcoming Games */}
         <div className="mb-10">

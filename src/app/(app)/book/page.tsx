@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
-import { Heart, Users, Clock, MapPin, Filter, Map, List } from "lucide-react";
+import { Heart, Users, Clock, MapPin, Filter, Map, List, Repeat, Download, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,14 @@ interface SlotData {
   spotsLeft: number;
   userJoined: boolean;
   userWaitlisted: boolean;
+  recurringGroupId: string | null;
+  friendsInSlot: string[];
+  recurringInfo: {
+    groupId: string;
+    totalInSeries: number;
+    remainingInSeries: number;
+    userSubscribed: boolean;
+  } | null;
 }
 
 interface Recommendation {
@@ -76,6 +85,8 @@ export default function BookPage() {
   const [formatFilter, setFormatFilter] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [friendsPlaying, setFriendsPlaying] = useState(false);
+  const [subscribing, setSubscribing] = useState<string | null>(null);
 
   const fetchSlots = useCallback(async () => {
     setLoading(true);
@@ -88,6 +99,7 @@ export default function BookPage() {
     if (formatFilter) params.set("format", formatFilter);
     if (dayOfWeek) params.set("dayOfWeek", dayOfWeek);
     if (timeOfDay) params.set("timeOfDay", timeOfDay);
+    if (friendsPlaying) params.set("friendsPlaying", "true");
 
     try {
       const res = await fetch(`/api/slots?${params}`);
@@ -98,7 +110,7 @@ export default function BookPage() {
     } finally {
       setLoading(false);
     }
-  }, [zip, radius, date, skillFilter, ageFilter, formatFilter, dayOfWeek, timeOfDay]);
+  }, [zip, radius, date, skillFilter, ageFilter, formatFilter, dayOfWeek, timeOfDay, friendsPlaying]);
 
   const fetchFavorites = useCallback(async () => {
     if (!session) return;
@@ -192,6 +204,30 @@ export default function BookPage() {
       }
     } catch {
       toast.error("Failed to cancel");
+    }
+  };
+
+  const toggleSubscription = async (groupId: string, subscribed: boolean) => {
+    if (!session) {
+      toast.error("Please sign in to subscribe");
+      return;
+    }
+    setSubscribing(groupId);
+    try {
+      const res = await fetch(`/api/recurring/${groupId}/subscribe`, {
+        method: subscribed ? "DELETE" : "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error);
+      } else {
+        toast.success(subscribed ? "Unsubscribed from series" : "Subscribed to series!");
+        fetchSlots();
+      }
+    } catch {
+      toast.error("Failed to update subscription");
+    } finally {
+      setSubscribing(null);
     }
   };
 
@@ -359,7 +395,7 @@ export default function BookPage() {
               {showMoreFilters ? "Hide" : "More"} Filters
             </button>
             {showMoreFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-3">
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-[#64748B] mb-1.5 block">Day of Week</Label>
                   <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
@@ -405,6 +441,17 @@ export default function BookPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                {session && (
+                  <div className="flex items-end pb-1">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={friendsPlaying}
+                        onCheckedChange={setFriendsPlaying}
+                      />
+                      <Label className="text-sm text-[#333333] cursor-pointer">Friends Playing</Label>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -506,7 +553,21 @@ export default function BookPage() {
                   <Badge variant="secondary" className="bg-[#F8F8F8] text-[#333333] border-0 rounded-full text-xs">
                     {ageLabel(slot.ageBracket)}
                   </Badge>
+                  {slot.recurringInfo && (
+                    <Badge variant="secondary" className="bg-[#F0FDF4] text-[#166534] border-0 rounded-full text-xs">
+                      <Repeat className="w-3 h-3 mr-1" />
+                      Weekly · {slot.recurringInfo.remainingInSeries} left
+                    </Badge>
+                  )}
                 </div>
+
+                {/* Friends playing indicator */}
+                {slot.friendsInSlot.length > 0 && (
+                  <div className="flex items-center gap-1.5 mb-3 text-xs text-[#0B4F6C]">
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>{slot.friendsInSlot.join(", ")} playing</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-xl font-medium text-[#0A0A0A]">
@@ -562,6 +623,38 @@ export default function BookPage() {
                   >
                     {joining === slot.id ? "Joining..." : "Join Waitlist"}
                   </Button>
+                )}
+
+                {/* Recurring series actions */}
+                {slot.recurringInfo && session && (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`flex-1 rounded-full text-xs ${
+                        slot.recurringInfo.userSubscribed
+                          ? "border-[#166534] text-[#166534]"
+                          : "border-[#E2E8F0] text-[#64748B]"
+                      }`}
+                      onClick={() =>
+                        toggleSubscription(slot.recurringInfo!.groupId, slot.recurringInfo!.userSubscribed)
+                      }
+                      disabled={subscribing === slot.recurringInfo.groupId}
+                    >
+                      <Repeat className="w-3.5 h-3.5 mr-1" />
+                      {slot.recurringInfo.userSubscribed ? "Subscribed" : "Subscribe"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-[#E2E8F0] text-[#64748B] rounded-full text-xs"
+                      asChild
+                    >
+                      <a href={`/api/recurring/${slot.recurringInfo.groupId}/calendar`}>
+                        <Download className="w-3.5 h-3.5 mr-1" /> .ics
+                      </a>
+                    </Button>
+                  </div>
                 )}
               </Card>
             ))}

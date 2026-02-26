@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, Star, Trophy, Users, ArrowLeft, ChevronRight } from "lucide-react";
+import { Calendar, Star, Trophy, Users, ArrowLeft, ChevronRight, UserPlus, UserCheck, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { skillLabel, ageBracketLabel } from "@/lib/constants";
+import { toast } from "sonner";
 
 interface PlayerProfile {
   id: string;
@@ -17,6 +19,8 @@ interface PlayerProfile {
   gamesPlayed: number;
   avgRating: number;
   ratingCount: number;
+  friendshipStatus: string | null;
+  friendshipId: string | null;
   recentGames: {
     id: string;
     clubName: string;
@@ -27,11 +31,13 @@ interface PlayerProfile {
 
 export default function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { data: session } = useSession();
   const [player, setPlayer] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [friendLoading, setFriendLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchPlayer = () => {
     fetch(`/api/players/${id}`)
       .then((res) => {
         if (!res.ok) {
@@ -45,7 +51,56 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ id: st
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchPlayer();
   }, [id]);
+
+  const sendFriendRequest = async () => {
+    setFriendLoading(true);
+    try {
+      const res = await fetch("/api/friends/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addresseeId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error);
+      } else {
+        toast.success("Friend request sent!");
+        fetchPlayer();
+      }
+    } catch {
+      toast.error("Failed to send friend request");
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  const respondToRequest = async (action: "ACCEPT" | "REJECT") => {
+    if (!player?.friendshipId) return;
+    setFriendLoading(true);
+    try {
+      const res = await fetch(`/api/friends/${player.friendshipId}/respond`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error);
+      } else {
+        toast.success(action === "ACCEPT" ? "Friend request accepted!" : "Friend request rejected");
+        fetchPlayer();
+      }
+    } catch {
+      toast.error("Failed to respond to request");
+    } finally {
+      setFriendLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -100,6 +155,59 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ id: st
     return stars;
   };
 
+  const renderFriendButton = () => {
+    if (!session || session.user.id === id) return null;
+
+    switch (player.friendshipStatus) {
+      case "ACCEPTED":
+        return (
+          <Badge className="bg-[#E8F4F8] text-[#0B4F6C] border-0 rounded-full px-4 py-2 text-sm">
+            <UserCheck className="w-4 h-4 mr-1.5" /> Friends
+          </Badge>
+        );
+      case "PENDING_SENT":
+        return (
+          <Badge className="bg-[#F1F5F9] text-[#64748B] border-0 rounded-full px-4 py-2 text-sm">
+            <Clock className="w-4 h-4 mr-1.5" /> Request Pending
+          </Badge>
+        );
+      case "PENDING_RECEIVED":
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full text-sm"
+              onClick={() => respondToRequest("ACCEPT")}
+              disabled={friendLoading}
+            >
+              Accept
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[#E2E8F0] text-[#64748B] rounded-full text-sm"
+              onClick={() => respondToRequest("REJECT")}
+              disabled={friendLoading}
+            >
+              Reject
+            </Button>
+          </div>
+        );
+      default:
+        return (
+          <Button
+            size="sm"
+            className="bg-[#0B4F6C] hover:bg-[#083D54] text-white rounded-full text-sm"
+            onClick={sendFriendRequest}
+            disabled={friendLoading}
+          >
+            <UserPlus className="w-4 h-4 mr-1.5" />
+            {friendLoading ? "Sending..." : "Add Friend"}
+          </Button>
+        );
+    }
+  };
+
   return (
     <div className="py-12">
       <div className="mx-auto max-w-5xl px-6">
@@ -118,7 +226,7 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ id: st
             <div className="w-16 h-16 rounded-full bg-[#E8F4F8] flex items-center justify-center text-2xl font-medium text-[#0B4F6C]">
               {player.name[0]}
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="font-[family-name:var(--font-heading)] text-3xl text-[#0A0A0A] tracking-wide">
                 {player.name}
               </h1>
@@ -131,6 +239,7 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ id: st
                 </Badge>
               </div>
             </div>
+            {renderFriendButton()}
           </div>
         </div>
 

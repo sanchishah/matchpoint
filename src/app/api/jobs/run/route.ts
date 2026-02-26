@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendEmail, reminderEmail, chatOpenEmail, shouldSendEmail } from "@/lib/email";
 import { sendPushToUser } from "@/lib/push";
+import { confirmGame } from "@/lib/game-service";
 import { format } from "date-fns";
 
 // This endpoint can be triggered manually in dev or by Vercel Cron in production
@@ -162,6 +163,74 @@ export async function POST() {
       data: { status: "COMPLETED" },
     });
     results.push(`Auto-completed ${completedGames.count} past games`);
+  }
+
+  // 6. Auto-join recurring subscribers to future slots
+  const activeSubscriptions = await prisma.recurringSubscription.findMany({
+    where: { active: true },
+    include: {
+      user: { include: { profile: true } },
+    },
+  });
+
+  let recurringJoins = 0;
+  for (const sub of activeSubscriptions) {
+    if (!sub.user.profile) continue;
+
+    // Find future OPEN/PENDING_FILL slots in this series where user is not a participant
+    const futureSlots = await prisma.slot.findMany({
+      where: {
+        recurringGroupId: sub.recurringGroupId,
+        status: { in: ["OPEN", "PENDING_FILL"] },
+        startTime: { gt: now },
+        participants: {
+          none: { userId: sub.userId },
+        },
+      },
+      include: {
+        participants: { where: { status: "JOINED" }, select: { id: true } },
+      },
+    });
+
+    for (const slot of futureSlots) {
+      // Check skill/age match
+      if (sub.user.profile.skillLevel !== slot.skillLevel) continue;
+      if (sub.user.profile.ageBracket !== slot.ageBracket) continue;
+
+      // Check capacity
+      const joinedCount = slot.participants.length;
+      if (joinedCount >= slot.requiredPlayers) continue;
+
+      await prisma.slotParticipant.create({
+        data: { slotId: slot.id, userId: sub.userId, status: "JOINED" },
+      });
+
+      if (joinedCount === 0) {
+        await prisma.slot.update({
+          where: { id: slot.id },
+          data: { status: "PENDING_FILL" },
+        });
+      }
+
+      await prisma.notification.create({
+        data: {
+          userId: sub.userId,
+          type: "RECURRING_AUTO_JOIN",
+          title: "Auto-joined to game",
+          body: `You've been auto-joined to a recurring game slot.`,
+        },
+      });
+
+      // Check if game should confirm
+      if (joinedCount + 1 >= slot.requiredPlayers) {
+        confirmGame(slot.id).catch(() => {});
+      }
+
+      recurringJoins++;
+    }
+  }
+  if (recurringJoins > 0) {
+    results.push(`Auto-joined ${recurringJoins} recurring subscribers`);
   }
 
   return NextResponse.json({

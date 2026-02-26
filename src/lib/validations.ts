@@ -68,6 +68,15 @@ export const emailPreferenceSchema = z.object({
   chatNotifications: z.boolean().optional(),
   marketing: z.boolean().optional(),
   referralUpdates: z.boolean().optional(),
+  friendRequests: z.boolean().optional(),
+});
+
+export const friendRequestSchema = z.object({
+  addresseeId: z.string().min(1, "Addressee ID is required"),
+});
+
+export const friendResponseSchema = z.object({
+  action: z.enum(["ACCEPT", "REJECT"]),
 });
 
 export const gameScoreSchema = z.object({

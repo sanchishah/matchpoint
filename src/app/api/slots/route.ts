@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
   const dayOfWeekRaw = searchParams.get("dayOfWeek");
   const dayOfWeek = dayOfWeekRaw !== null && dayOfWeekRaw !== "" ? parseInt(dayOfWeekRaw) : null;
   const timeOfDay = searchParams.get("timeOfDay") || null;
+  const friendsPlaying = searchParams.get("friendsPlaying") === "true";
 
   const where: Record<string, unknown> = {
     status: { in: ["OPEN", "PENDING_FILL"] },
@@ -94,6 +95,70 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Get friend IDs and subscription status for the current user
+  let friendIds: string[] = [];
+  const friendNameMap = new Map<string, string>();
+  const subscribedGroupIds = new Set<string>();
+
+  if (session?.user?.id) {
+    // Load friend IDs
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        status: "ACCEPTED",
+        OR: [
+          { requesterId: session.user.id },
+          { addresseeId: session.user.id },
+        ],
+      },
+      include: {
+        requester: { select: { id: true, name: true, profile: { select: { name: true } } } },
+        addressee: { select: { id: true, name: true, profile: { select: { name: true } } } },
+      },
+    });
+
+    for (const f of friendships) {
+      const other = f.requesterId === session.user.id ? f.addressee : f.requester;
+      friendIds.push(other.id);
+      friendNameMap.set(other.id, other.profile?.name || other.name || "Friend");
+    }
+
+    // Load recurring subscriptions
+    const subs = await prisma.recurringSubscription.findMany({
+      where: { userId: session.user.id, active: true },
+      select: { recurringGroupId: true },
+    });
+    for (const s of subs) {
+      subscribedGroupIds.add(s.recurringGroupId);
+    }
+  }
+
+  // Filter by friends playing if requested
+  if (friendsPlaying && friendIds.length > 0) {
+    filtered = filtered.filter((slot) =>
+      slot.participants.some((p) => friendIds.includes(p.userId))
+    );
+  }
+
+  // Get recurring series info for slots with recurringGroupId
+  const recurringGroupIds = [
+    ...new Set(filtered.filter((s) => s.recurringGroupId).map((s) => s.recurringGroupId!)),
+  ];
+
+  const recurringCounts = new Map<string, { total: number; remaining: number }>();
+  if (recurringGroupIds.length > 0) {
+    for (const gid of recurringGroupIds) {
+      const total = await prisma.slot.count({ where: { recurringGroupId: gid } });
+      const remaining = await prisma.slot.count({
+        where: {
+          recurringGroupId: gid,
+          startTime: { gt: new Date() },
+          status: { in: ["OPEN", "PENDING_FILL", "CONFIRMED"] },
+        },
+      });
+      recurringCounts.set(gid, { total, remaining });
+    }
+  }
+
   const result = filtered.map((slot) => {
     const joinedCount = slot.participants.filter((p) => p.status === "JOINED").length;
     const waitlistedCount = slot.participants.filter((p) => p.status === "WAITLISTED").length;
@@ -109,6 +174,23 @@ export async function GET(req: NextRequest) {
     const waitlistPosition = session?.user?.id && userWaitlisted
       ? waitlisted.findIndex((p) => p.userId === session.user.id) + 1
       : null;
+
+    // Friends in this slot
+    const friendsInSlot = slot.participants
+      .filter((p) => friendIds.includes(p.userId))
+      .map((p) => friendNameMap.get(p.userId) || "Friend");
+
+    // Recurring info
+    let recurringInfo = null;
+    if (slot.recurringGroupId) {
+      const counts = recurringCounts.get(slot.recurringGroupId);
+      recurringInfo = {
+        groupId: slot.recurringGroupId,
+        totalInSeries: counts?.total ?? 0,
+        remainingInSeries: counts?.remaining ?? 0,
+        userSubscribed: subscribedGroupIds.has(slot.recurringGroupId),
+      };
+    }
 
     return {
       id: slot.id,
@@ -131,12 +213,15 @@ export async function GET(req: NextRequest) {
       status: slot.status,
       lockTime: slot.lockTime,
       notes: slot.notes,
+      recurringGroupId: slot.recurringGroupId,
       joinedCount,
       waitlistedCount,
       spotsLeft: slot.requiredPlayers - joinedCount,
       userJoined,
       userWaitlisted,
       waitlistPosition,
+      friendsInSlot,
+      recurringInfo,
     };
   });
 

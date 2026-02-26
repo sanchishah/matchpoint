@@ -8,6 +8,7 @@ import {
   LogOut,
   LayoutDashboard,
   Gamepad2,
+  Users,
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,15 @@ export default function Navbar() {
                         My Games
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/friends"
+                        className="cursor-pointer font-[family-name:var(--font-inter)]"
+                      >
+                        <Users className="size-4" />
+                        Friends
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -202,6 +212,14 @@ export default function Navbar() {
                     >
                       <Gamepad2 className="size-4" />
                       My Games
+                    </Link>
+                    <Link
+                      href="/friends"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#333333] transition-colors hover:bg-[#E8F4F8]/50 hover:text-[#0B4F6C] font-[family-name:var(--font-inter)]"
+                    >
+                      <Users className="size-4" />
+                      Friends
                     </Link>
                     <div className="my-2 h-px bg-[#E2E8F0]" />
                     <button

@@ -15,6 +15,7 @@ interface EmailPreferences {
   chatNotifications: boolean;
   marketing: boolean;
   referralUpdates: boolean;
+  friendRequests: boolean;
 }
 
 const prefLabels: { key: keyof EmailPreferences; label: string; description: string }[] = [
@@ -23,6 +24,7 @@ const prefLabels: { key: keyof EmailPreferences; label: string; description: str
   { key: "chatNotifications", label: "Chat Notifications", description: "Emails when game chat opens" },
   { key: "marketing", label: "Marketing", description: "Updates about new features and promotions" },
   { key: "referralUpdates", label: "Referral Updates", description: "Notifications about your referral rewards" },
+  { key: "friendRequests", label: "Friend Requests", description: "Emails when someone sends you a friend request" },
 ];
 
 export default function SettingsPage() {
@@ -34,6 +36,7 @@ export default function SettingsPage() {
     chatNotifications: true,
     marketing: true,
     referralUpdates: true,
+    friendRequests: true,
   });
   const [loading, setLoading] = useState(true);
 

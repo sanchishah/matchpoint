@@ -6,6 +6,7 @@ import { slotSchema } from "@/lib/validations";
 import { sendEmail } from "@/lib/email";
 import { waitlistNotifyEmailHtml, waitlistNotifyEmailText } from "@/lib/emails/waitlist-notify";
 import { distanceMiles } from "@/lib/constants";
+import { confirmGame } from "@/lib/game-service";
 import { format } from "date-fns";
 
 async function requireAdmin() {
@@ -78,6 +79,10 @@ export async function POST(req: Request) {
     }
 
     const result = await prisma.slot.createMany({ data: slots });
+
+    // Auto-join existing subscribers to the new recurring slots
+    autoJoinSubscribers(recurringGroupId, parsed.data).catch(() => {});
+
     return NextResponse.json({ created: result.count, recurringGroupId });
   }
 
@@ -153,5 +158,71 @@ async function notifyMatchingUsers(slot: {
         body: `A new game at ${slot.club.name} on ${dateStr} matches your preferences.`,
       },
     });
+  }
+}
+
+async function autoJoinSubscribers(
+  recurringGroupId: string,
+  slotData: { skillLevel: number; ageBracket: string }
+) {
+  // Find active subscriptions for this recurring group
+  const subscriptions = await prisma.recurringSubscription.findMany({
+    where: { recurringGroupId, active: true },
+    include: { user: { include: { profile: true } } },
+  });
+
+  if (subscriptions.length === 0) return;
+
+  // Get the newly created future slots
+  const futureSlots = await prisma.slot.findMany({
+    where: {
+      recurringGroupId,
+      status: { in: ["OPEN", "PENDING_FILL"] },
+      startTime: { gt: new Date() },
+    },
+    include: {
+      participants: { where: { status: "JOINED" }, select: { userId: true } },
+    },
+  });
+
+  for (const sub of subscriptions) {
+    if (!sub.user.profile) continue;
+    if (sub.user.profile.skillLevel !== slotData.skillLevel) continue;
+    if (sub.user.profile.ageBracket !== slotData.ageBracket) continue;
+
+    for (const slot of futureSlots) {
+      // Skip if already a participant
+      if (slot.participants.some((p) => p.userId === sub.userId)) continue;
+
+      const joinedCount = slot.participants.length;
+      if (joinedCount >= slot.requiredPlayers) continue;
+
+      await prisma.slotParticipant.create({
+        data: { slotId: slot.id, userId: sub.userId, status: "JOINED" },
+      });
+
+      // Add to in-memory list so subsequent subscribers see updated count
+      slot.participants.push({ userId: sub.userId });
+
+      if (joinedCount === 0) {
+        await prisma.slot.update({
+          where: { id: slot.id },
+          data: { status: "PENDING_FILL" },
+        });
+      }
+
+      await prisma.notification.create({
+        data: {
+          userId: sub.userId,
+          type: "RECURRING_AUTO_JOIN",
+          title: "Auto-joined to game",
+          body: `You've been auto-joined to a recurring game slot.`,
+        },
+      });
+
+      if (joinedCount + 1 >= slot.requiredPlayers) {
+        confirmGame(slot.id).catch(() => {});
+      }
+    }
   }
 }

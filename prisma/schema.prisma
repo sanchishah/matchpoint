@@ -47,6 +47,10 @@ model User {
   pushSubscriptions PushSubscription[]
   emailPreference   EmailPreference?
   scoresSubmitted   GameScore[]
+
+  friendshipsRequested  Friendship[] @relation("FriendshipsRequested")
+  friendshipsReceived   Friendship[] @relation("FriendshipsReceived")
+  recurringSubscriptions RecurringSubscription[]
 }
 
 model Account {
@@ -169,6 +173,8 @@ model Slot {
   club         Club              @relation(fields: [clubId], references: [id], onDelete: Cascade)
   participants SlotParticipant[]
   game         Game?
+
+  @@index([recurringGroupId])
 }
 
 model SlotParticipant {
@@ -368,6 +374,7 @@ model EmailPreference {
   chatNotifications  Boolean @default(true)
   marketing          Boolean @default(true)
   referralUpdates    Boolean @default(true)
+  friendRequests     Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -452,4 +459,42 @@ enum FeltLevel {
   BELOW
   AT
   ABOVE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// ─── Friendships ─────────────────────────────────────
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("FriendshipsRequested", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipsReceived", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+}
+
+// ─── Recurring Subscriptions ─────────────────────────
+
+model RecurringSubscription {
+  id               String   @id @default(cuid())
+  userId           String
+  recurringGroupId String
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recurringGroupId])
+  @@index([recurringGroupId, active])
 }

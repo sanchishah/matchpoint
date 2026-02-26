@@ -135,7 +135,7 @@ export async function sendEmail({
 
 // ── Email preference check ───────────────────────────────
 
-export type EmailType = "gameConfirmations" | "reminders" | "chatNotifications" | "marketing" | "referralUpdates";
+export type EmailType = "gameConfirmations" | "reminders" | "chatNotifications" | "marketing" | "referralUpdates" | "friendRequests";
 
 export async function shouldSendEmail(userId: string, type: EmailType): Promise<boolean> {
   const pref = await prisma.emailPreference.findUnique({ where: { userId } });

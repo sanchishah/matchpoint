@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const session = await auth();
 
   const user = await prisma.user.findUnique({
     where: { id },
@@ -67,6 +69,31 @@ export async function GET(
     format: gp.game.slot.format,
   }));
 
+  // Determine friendship status with current user
+  let friendshipStatus: string | null = null;
+  let friendshipId: string | null = null;
+
+  if (session?.user?.id && session.user.id !== id) {
+    const friendship = await prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { requesterId: session.user.id, addresseeId: id },
+          { requesterId: id, addresseeId: session.user.id },
+        ],
+      },
+    });
+
+    if (friendship) {
+      friendshipId = friendship.id;
+      if (friendship.status === "ACCEPTED") {
+        friendshipStatus = "ACCEPTED";
+      } else if (friendship.status === "PENDING") {
+        friendshipStatus =
+          friendship.requesterId === session.user.id ? "PENDING_SENT" : "PENDING_RECEIVED";
+      }
+    }
+  }
+
   return NextResponse.json({
     id: user.id,
     name: user.profile.name,
@@ -76,5 +103,7 @@ export async function GET(
     avgRating,
     ratingCount: ratings.length,
     recentGames,
+    friendshipStatus,
+    friendshipId,
   });
 }
