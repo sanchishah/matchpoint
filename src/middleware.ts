@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // getToken decodes the JWT from cookies — works in Edge, no DB needed
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET });
   const isLoggedIn = !!token;
   const role = token?.role as string | undefined;
 

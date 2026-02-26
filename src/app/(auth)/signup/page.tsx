@@ -81,7 +81,7 @@ function SignupForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        toast.error(data?.message ?? "Could not create your account. Please try again.");
+        toast.error(data?.error ?? "Could not create your account. Please try again.");
         return;
       }
 
