@@ -92,6 +92,16 @@ async function main() {
   }
   console.log(`${clubs.length} clubs seeded`);
 
+  // Set Los Gatos club as APJCC branded club
+  const losGatosClub = clubs.find((c) => c.name === "Los Gatos Racquet Club");
+  if (losGatosClub) {
+    await prisma.club.update({
+      where: { id: losGatosClub.id },
+      data: { slug: "los-gatos", name: "Addison-Penzak JCC", address: "14855 Oka Rd" },
+    });
+    console.log("Los Gatos club updated to APJCC");
+  }
+
   // Create slots for next 2 weeks
   const now = new Date();
   const formats: GameFormat[] = ["SINGLES", "DOUBLES"];

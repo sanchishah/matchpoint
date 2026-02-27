@@ -16,6 +16,7 @@ interface EmailPreferences {
   marketing: boolean;
   referralUpdates: boolean;
   friendRequests: boolean;
+  availabilityMatches: boolean;
 }
 
 const prefLabels: { key: keyof EmailPreferences; label: string; description: string }[] = [
@@ -25,6 +26,7 @@ const prefLabels: { key: keyof EmailPreferences; label: string; description: str
   { key: "marketing", label: "Marketing", description: "Updates about new features and promotions" },
   { key: "referralUpdates", label: "Referral Updates", description: "Notifications about your referral rewards" },
   { key: "friendRequests", label: "Friend Requests", description: "Emails when someone sends you a friend request" },
+  { key: "availabilityMatches", label: "Availability Matches", description: "Emails when a game matches your availability windows" },
 ];
 
 export default function SettingsPage() {
@@ -37,6 +39,7 @@ export default function SettingsPage() {
     marketing: true,
     referralUpdates: true,
     friendRequests: true,
+    availabilityMatches: true,
   });
   const [loading, setLoading] = useState(true);
 

@@ -51,6 +51,7 @@ model User {
   friendshipsRequested  Friendship[] @relation("FriendshipsRequested")
   friendshipsReceived   Friendship[] @relation("FriendshipsReceived")
   recurringSubscriptions RecurringSubscription[]
+  availabilityWindows    AvailabilityWindow[]
 }
 
 model Account {
@@ -125,6 +126,7 @@ model Profile {
 model Club {
   id        String   @id @default(cuid())
   name      String
+  slug      String?  @unique
   address   String
   city      String
   state     String   @default("CA")
@@ -374,7 +376,8 @@ model EmailPreference {
   chatNotifications  Boolean @default(true)
   marketing          Boolean @default(true)
   referralUpdates    Boolean @default(true)
-  friendRequests     Boolean @default(true)
+  friendRequests       Boolean @default(true)
+  availabilityMatches  Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -391,6 +394,23 @@ model GameScore {
 
   game        Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   submittedBy User @relation(fields: [submittedById], references: [id], onDelete: Cascade)
+}
+
+// ─── Availability Windows ───────────────────────────
+
+model AvailabilityWindow {
+  id        String   @id @default(cuid())
+  userId    String
+  dayOfWeek Int      // 0=Sun, 6=Sat
+  startHour Int      // 0-23
+  endHour   Int      // 0-23
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek, startHour, endHour])
+  @@index([dayOfWeek, active])
 }
 
 // ─── Enums ──────────────────────────────────────────

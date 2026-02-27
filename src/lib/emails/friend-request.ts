@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
+
 const SUPPORT_EMAIL = "support@matchpoint.app";
 
 export function friendRequestEmailHtml(firstName: string, senderName: string): string {
@@ -31,7 +33,7 @@ export function friendRequestEmailHtml(firstName: string, senderName: string): s
       You received this email because you have a Matchpoint account.
       To manage email preferences, visit your
       <a href="${process.env.APP_BASE_URL || "http://localhost:3000"}/dashboard/settings" style="color:#0B4F6C;">settings</a>.
-      <br />Questions? Contact ${SUPPORT_EMAIL}.
+      <br />${SUPPORT_EMAIL} &middot; Contact: ${CONTACT_EMAIL}
     </p>
   </div>
 </body>
@@ -39,7 +41,7 @@ export function friendRequestEmailHtml(firstName: string, senderName: string): s
 }
 
 export function friendRequestEmailText(firstName: string, senderName: string): string {
-  return `Hi ${firstName},\n\n${senderName} sent you a friend request on Matchpoint! View it at ${process.env.APP_BASE_URL || "http://localhost:3000"}/friends\n\nMatchpoint - Where players meet their match.`;
+  return `Hi ${firstName},\n\n${senderName} sent you a friend request on Matchpoint! View it at ${process.env.APP_BASE_URL || "http://localhost:3000"}/friends\n\nMatchpoint - Where players meet their match.\n\n---\n${SUPPORT_EMAIL} · Contact: ${CONTACT_EMAIL}`;
 }
 
 export function friendAcceptedEmailHtml(firstName: string, accepterName: string): string {
@@ -73,7 +75,7 @@ export function friendAcceptedEmailHtml(firstName: string, accepterName: string)
       You received this email because you have a Matchpoint account.
       To manage email preferences, visit your
       <a href="${process.env.APP_BASE_URL || "http://localhost:3000"}/dashboard/settings" style="color:#0B4F6C;">settings</a>.
-      <br />Questions? Contact ${SUPPORT_EMAIL}.
+      <br />${SUPPORT_EMAIL} &middot; Contact: ${CONTACT_EMAIL}
     </p>
   </div>
 </body>
@@ -81,5 +83,5 @@ export function friendAcceptedEmailHtml(firstName: string, accepterName: string)
 }
 
 export function friendAcceptedEmailText(firstName: string, accepterName: string): string {
-  return `Hi ${firstName},\n\n${accepterName} accepted your friend request on Matchpoint! View your friends at ${process.env.APP_BASE_URL || "http://localhost:3000"}/friends\n\nMatchpoint - Where players meet their match.`;
+  return `Hi ${firstName},\n\n${accepterName} accepted your friend request on Matchpoint! View your friends at ${process.env.APP_BASE_URL || "http://localhost:3000"}/friends\n\nMatchpoint - Where players meet their match.\n\n---\n${SUPPORT_EMAIL} · Contact: ${CONTACT_EMAIL}`;
 }

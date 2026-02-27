@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { sendEmail, reminderEmail, chatOpenEmail, shouldSendEmail } from "@/lib/email";
 import { sendPushToUser } from "@/lib/push";
 import { confirmGame } from "@/lib/game-service";
+import { distanceMiles } from "@/lib/constants";
+import { availabilityMatchEmailHtml, availabilityMatchEmailText } from "@/lib/emails/availability-match";
 import { format } from "date-fns";
 
 // This endpoint can be triggered manually in dev or by Vercel Cron in production
@@ -231,6 +233,100 @@ export async function POST() {
   }
   if (recurringJoins > 0) {
     results.push(`Auto-joined ${recurringJoins} recurring subscribers`);
+  }
+
+  // 7. Availability match notifications
+  const activeWindows = await prisma.availabilityWindow.findMany({
+    where: { active: true },
+    include: {
+      user: { include: { profile: true } },
+    },
+  });
+
+  let availabilityNotifs = 0;
+  for (const window of activeWindows) {
+    if (!window.user.profile) continue;
+
+    // Find OPEN/PENDING_FILL slots matching this window
+    const matchingSlots = await prisma.slot.findMany({
+      where: {
+        status: { in: ["OPEN", "PENDING_FILL"] },
+        startTime: { gt: now },
+        skillLevel: window.user.profile.skillLevel,
+        ageBracket: window.user.profile.ageBracket,
+        participants: {
+          none: { userId: window.userId },
+        },
+      },
+      include: {
+        club: true,
+        participants: { where: { status: "JOINED" }, select: { id: true } },
+      },
+    });
+
+    for (const slot of matchingSlots) {
+      // Check day of week and hour match
+      if (slot.startTime.getDay() !== window.dayOfWeek) continue;
+      const slotHour = slot.startTime.getHours();
+      if (slotHour < window.startHour || slotHour >= window.endHour) continue;
+
+      // Check capacity
+      if (slot.participants.length >= slot.requiredPlayers) continue;
+
+      // Check distance
+      if (window.user.profile.lat && window.user.profile.lng) {
+        const dist = distanceMiles(
+          window.user.profile.lat,
+          window.user.profile.lng,
+          slot.club.lat,
+          slot.club.lng
+        );
+        if (dist > window.user.profile.radiusMiles) continue;
+      }
+
+      // Check not already notified for this slot
+      const alreadyNotified = await prisma.notification.findFirst({
+        where: {
+          userId: window.userId,
+          type: "AVAILABILITY_MATCH",
+          body: { contains: slot.id },
+        },
+      });
+      if (alreadyNotified) continue;
+
+      const name = window.user.profile.name || window.user.name || "Player";
+      const dateStr = format(slot.startTime, "EEEE, MMM d 'at' h:mm a");
+      const bookUrl = `${process.env.APP_BASE_URL || "http://localhost:3000"}/book?slot=${slot.id}`;
+
+      await prisma.notification.create({
+        data: {
+          userId: window.userId,
+          type: "AVAILABILITY_MATCH",
+          title: "Game matches your availability!",
+          body: `${slot.club.name} on ${dateStr} (slot:${slot.id})`,
+        },
+      });
+
+      if (await shouldSendEmail(window.userId, "availabilityMatches")) {
+        await sendEmail({
+          to: window.user.email,
+          subject: "A game matches your availability!",
+          html: availabilityMatchEmailHtml({ firstName: name, clubName: slot.club.name, dateStr, bookUrl }),
+          text: availabilityMatchEmailText({ firstName: name, clubName: slot.club.name, dateStr, bookUrl }),
+        });
+      }
+
+      sendPushToUser(window.userId, {
+        title: "Game matches your availability!",
+        body: `${slot.club.name} on ${dateStr}`,
+        url: `/book?slot=${slot.id}`,
+      }).catch(() => {});
+
+      availabilityNotifs++;
+    }
+  }
+  if (availabilityNotifs > 0) {
+    results.push(`Sent ${availabilityNotifs} availability match notifications`);
   }
 
   return NextResponse.json({

@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
+
 const SUPPORT_EMAIL = "support@matchpoint.app";
 
 interface CancellationTemplateVars {
@@ -27,6 +29,7 @@ export function gameCancelledEmailHtml({ firstName, clubName, dateStr }: Cancell
         <tr><td style="padding:20px 32px;background-color:#f7f5f2;border-top:1px solid #e8e4df;">
           <p style="margin:0;font-size:12px;color:#999999;line-height:1.5;">
             <a href="mailto:${SUPPORT_EMAIL}" style="color:#64748B;text-decoration:none;">${SUPPORT_EMAIL}</a>
+              &nbsp;&middot;&nbsp; Contact: ${CONTACT_EMAIL}
           </p>
         </td></tr>
       </table>
@@ -49,7 +52,7 @@ See you on court,
 The MatchPoint Team
 
 ---
-${SUPPORT_EMAIL}
+${SUPPORT_EMAIL} · Contact: ${CONTACT_EMAIL}
 `;
 }
 
@@ -79,6 +82,7 @@ export function refundConfirmationEmailHtml({ firstName, clubName, amount }: Ref
         <tr><td style="padding:20px 32px;background-color:#f7f5f2;border-top:1px solid #e8e4df;">
           <p style="margin:0;font-size:12px;color:#999999;line-height:1.5;">
             <a href="mailto:${SUPPORT_EMAIL}" style="color:#64748B;text-decoration:none;">${SUPPORT_EMAIL}</a>
+              &nbsp;&middot;&nbsp; Contact: ${CONTACT_EMAIL}
           </p>
         </td></tr>
       </table>
@@ -99,6 +103,6 @@ See you on court,
 The MatchPoint Team
 
 ---
-${SUPPORT_EMAIL}
+${SUPPORT_EMAIL} · Contact: ${CONTACT_EMAIL}
 `;
 }

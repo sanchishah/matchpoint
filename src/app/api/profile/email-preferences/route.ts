@@ -22,6 +22,7 @@ export async function GET() {
       marketing: true,
       referralUpdates: true,
       friendRequests: true,
+      availabilityMatches: true,
     }
   );
 }

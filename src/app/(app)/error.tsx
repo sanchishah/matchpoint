@@ -1,14 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export default function AppError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <div className="flex items-center justify-center min-h-[60vh] px-6">
       <Card className="border-[#E2E8F0] rounded-xl p-8 text-center max-w-md">

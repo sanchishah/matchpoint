@@ -27,6 +27,7 @@
 
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 // ── Provider interface ───────────────────────────────────
 
@@ -135,7 +136,7 @@ export async function sendEmail({
 
 // ── Email preference check ───────────────────────────────
 
-export type EmailType = "gameConfirmations" | "reminders" | "chatNotifications" | "marketing" | "referralUpdates" | "friendRequests";
+export type EmailType = "gameConfirmations" | "reminders" | "chatNotifications" | "marketing" | "referralUpdates" | "friendRequests" | "availabilityMatches";
 
 export async function shouldSendEmail(userId: string, type: EmailType): Promise<boolean> {
   const pref = await prisma.emailPreference.findUnique({ where: { userId } });
@@ -156,6 +157,8 @@ export function gameConfirmedEmail(playerName: string, clubName: string, dateStr
         <p style="color: #333333;">Your share: <strong>${amount}</strong> has been charged.</p>
         <p style="color: #333333;">Chat opens 15 minutes before your game. See you on the court!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -171,6 +174,8 @@ export function spotReservedEmail(playerName: string, clubName: string, dateStr:
         <p style="color: #333333;">You've reserved a spot at <strong>${clubName}</strong> on <strong>${dateStr}</strong>.</p>
         <p style="color: #333333;">We're waiting for more players to fill the game. You'll only be charged once confirmed.</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -186,6 +191,8 @@ export function reminderEmail(playerName: string, clubName: string, dateStr: str
         <p style="color: #333333;">Your game at <strong>${clubName}</strong> on <strong>${dateStr}</strong> starts in <strong>${hoursUntil} hours</strong>.</p>
         <p style="color: #333333;">Get ready to play!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -200,6 +207,8 @@ export function chatOpenEmail(playerName: string, clubName: string) {
         <p style="color: #333333;">Hi ${playerName},</p>
         <p style="color: #333333;">The game chat for your match at <strong>${clubName}</strong> is now open. Coordinate with your fellow players!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
+        <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };

@@ -1,3 +1,5 @@
+export const CONTACT_EMAIL = "contactmymatchpoint@gmail.com";
+
 export const SKILL_LEVELS = [
   { value: 1, label: "Beginner" },
   { value: 2, label: "Beginner+" },

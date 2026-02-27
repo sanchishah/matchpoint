@@ -2,14 +2,14 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 
 const SUPPORT_EMAIL = "support@matchpoint.app";
 
-interface WaitlistNotifyVars {
+interface AvailabilityMatchVars {
   firstName: string;
   clubName: string;
   dateStr: string;
   bookUrl: string;
 }
 
-export function waitlistNotifyEmailHtml({ firstName, clubName, dateStr, bookUrl }: WaitlistNotifyVars): string {
+export function availabilityMatchEmailHtml({ firstName, clubName, dateStr, bookUrl }: AvailabilityMatchVars): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -22,7 +22,7 @@ export function waitlistNotifyEmailHtml({ firstName, clubName, dateStr, bookUrl 
         </td></tr>
         <tr><td style="padding:32px;">
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hi ${firstName},</p>
-          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">A new game matching your preferences just opened up!</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">A game matching your availability just opened up!</p>
           <p style="margin:0 0 24px;font-size:16px;line-height:1.6;"><strong>${clubName}</strong> on <strong>${dateStr}</strong></p>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
             <tr>
@@ -47,10 +47,10 @@ export function waitlistNotifyEmailHtml({ firstName, clubName, dateStr, bookUrl 
 </html>`;
 }
 
-export function waitlistNotifyEmailText({ firstName, clubName, dateStr, bookUrl }: WaitlistNotifyVars): string {
+export function availabilityMatchEmailText({ firstName, clubName, dateStr, bookUrl }: AvailabilityMatchVars): string {
   return `Hi ${firstName},
 
-A new game matching your preferences just opened up!
+A game matching your availability just opened up!
 
 ${clubName} on ${dateStr}
 

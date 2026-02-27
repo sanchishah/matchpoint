@@ -17,10 +17,9 @@ export const DEFAULT_LOGIN_SUBJECT = "New sign-in to your MatchPoint account";
 
 // ── Shared vars ──────────────────────────────────────────
 
-const SUPPORT_EMAIL = "support@matchpoint.app";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
-// TODO: Replace with real physical address before production launch.
-const COMPANY_ADDRESS_PLACEHOLDER = "MatchPoint HQ, South Bay, CA";
+const SUPPORT_EMAIL = "support@matchpoint.app";
 
 interface LoginTemplateVars {
   firstName: string;
@@ -47,7 +46,7 @@ See you on court,
 The MatchPoint Team
 
 ---
-${SUPPORT_EMAIL} | ${COMPANY_ADDRESS_PLACEHOLDER}
+${SUPPORT_EMAIL} · Contact: ${CONTACT_EMAIL}
 Manage notifications: ${unsubscribeUrl}
 `;
 }
@@ -102,7 +101,7 @@ export function loginEmailHtml({
           <td style="padding:20px 32px;background-color:#f7f5f2;border-top:1px solid #e8e4df;">
             <p style="margin:0 0 6px;font-size:12px;color:#999999;line-height:1.5;">
               <a href="mailto:${SUPPORT_EMAIL}" style="color:#64748B;text-decoration:none;">${SUPPORT_EMAIL}</a>
-              &nbsp;&middot;&nbsp; ${COMPANY_ADDRESS_PLACEHOLDER}
+              &nbsp;&middot;&nbsp; Contact: ${CONTACT_EMAIL}
             </p>
             <p style="margin:0;font-size:12px;color:#999999;line-height:1.5;">
               <a href="${unsubscribeUrl}" style="color:#64748B;text-decoration:underline;">Manage notification preferences</a>

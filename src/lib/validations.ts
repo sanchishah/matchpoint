@@ -69,6 +69,15 @@ export const emailPreferenceSchema = z.object({
   marketing: z.boolean().optional(),
   referralUpdates: z.boolean().optional(),
   friendRequests: z.boolean().optional(),
+  availabilityMatches: z.boolean().optional(),
+});
+
+export const availabilityWindowSchema = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  startHour: z.number().int().min(0).max(23),
+  endHour: z.number().int().min(0).max(23),
+}).refine((data) => data.endHour > data.startHour, {
+  message: "End hour must be after start hour",
 });
 
 export const friendRequestSchema = z.object({
