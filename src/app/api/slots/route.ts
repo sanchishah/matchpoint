@@ -133,10 +133,14 @@ export async function GET(req: NextRequest) {
   }
 
   // Filter by friends playing if requested
-  if (friendsPlaying && friendIds.length > 0) {
-    filtered = filtered.filter((slot) =>
-      slot.participants.some((p) => friendIds.includes(p.userId))
-    );
+  if (friendsPlaying) {
+    if (friendIds.length === 0) {
+      filtered = [];
+    } else {
+      filtered = filtered.filter((slot) =>
+        slot.participants.some((p) => friendIds.includes(p.userId))
+      );
+    }
   }
 
   // Get recurring series info for slots with recurringGroupId

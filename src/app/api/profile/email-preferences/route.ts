@@ -21,6 +21,7 @@ export async function GET() {
       chatNotifications: true,
       marketing: true,
       referralUpdates: true,
+      friendRequests: true,
     }
   );
 }
