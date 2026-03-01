@@ -43,6 +43,8 @@ export async function GET(req: Request) {
         status: { in: ["OPEN", "PENDING_FILL"] },
         startTime: { gte: dateFrom, lte: dateTo },
         lockTime: { gt: now },
+        // Single-court launch: only show APJCC Los Gatos
+        club: { slug: "los-gatos" },
       },
       include: {
         club: true,
