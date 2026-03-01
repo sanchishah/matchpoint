@@ -3,9 +3,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  outputFileTracingIncludes: {
-    "/**": ["./node_modules/.prisma/**/*", "./node_modules/@prisma/client/**/*"],
-  },
   images: {
     remotePatterns: [
       {
