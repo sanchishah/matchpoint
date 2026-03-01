@@ -43,6 +43,8 @@ export async function GET(req: NextRequest) {
   const where: Record<string, unknown> = {
     status: { in: ["OPEN", "PENDING_FILL"] },
     startTime: { gt: new Date() },
+    // Single-court launch: only show APJCC Los Gatos
+    club: { slug: "los-gatos" },
   };
 
   if (date) {

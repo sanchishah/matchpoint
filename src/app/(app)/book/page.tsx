@@ -64,6 +64,7 @@ interface Recommendation {
   score: number;
   reasons: string[];
   distance: number;
+  friendsInSlot: number;
 }
 
 export default function BookPage() {
@@ -104,9 +105,7 @@ export default function BookPage() {
     try {
       const res = await fetch(`/api/slots?${params}`);
       const data = await res.json();
-      // For now, only show APJCC Los Gatos court
-      const filtered = data.filter((s: SlotData) => s.club.name === "Addison-Penzak JCC");
-      setSlots(filtered);
+      setSlots(data);
     } catch {
       toast.error("Failed to load slots");
     } finally {
@@ -280,6 +279,15 @@ export default function BookPage() {
                       {format(new Date(rec.slot.startTime), "EEE, MMM d · h:mm a")}
                     </p>
                     <div className="flex flex-wrap gap-1 mb-3">
+                      {rec.friendsInSlot > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-[#F0FDF4] text-[#166534] border-0 rounded-full text-[10px] px-2 py-0.5"
+                        >
+                          <UserCheck className="w-3 h-3 mr-0.5" />
+                          Friends playing
+                        </Badge>
+                      )}
                       {rec.reasons.map((r) => (
                         <Badge
                           key={r}
