@@ -104,7 +104,9 @@ export default function BookPage() {
     try {
       const res = await fetch(`/api/slots?${params}`);
       const data = await res.json();
-      setSlots(data);
+      // For now, only show APJCC Los Gatos court
+      const filtered = data.filter((s: SlotData) => s.club.name === "Addison-Penzak JCC");
+      setSlots(filtered);
     } catch {
       toast.error("Failed to load slots");
     } finally {
