@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift, CreditCard, Settings, Users, Clock } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle, ChevronRight, User, Search, Bell, BarChart3, Gift, CreditCard, Settings, Users, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -241,6 +241,18 @@ export default function DashboardPage() {
                   <Clock className="w-4 h-4 text-[#0B4F6C]" />
                 </div>
                 <span className="text-sm text-[#333333] font-medium">My Availability</span>
+                <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/availability/matches">
+            <Card className="border-[#0B4F6C]/10 bg-[#E8F4F8]/30 rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E8F4F8] flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-[#0B4F6C]" />
+                </div>
+                <span className="text-sm text-[#333333] font-medium">Availability Matches</span>
                 <ChevronRight className="w-4 h-4 text-[#64748B] ml-auto" />
               </div>
             </Card>

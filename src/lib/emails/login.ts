@@ -7,7 +7,7 @@
  * Placeholders resolved at render time:
  *   {{first_name}}      – user's first name (parsed from full name)
  *   {{login_time}}      – formatted login timestamp
- *   {{support_email}}   – support@matchpoint.app
+ *   {{support_email}}   – support@mymatchpoint.com
  *   {{company_address}} – physical mailing address (CAN-SPAM)
  *   {{unsubscribe_url}} – notification preferences / unsubscribe link
  */
@@ -19,7 +19,7 @@ export const DEFAULT_LOGIN_SUBJECT = "New sign-in to your MatchPoint account";
 
 import { CONTACT_EMAIL } from "@/lib/constants";
 
-const SUPPORT_EMAIL = "support@matchpoint.app";
+const SUPPORT_EMAIL = "support@mymatchpoint.com";
 
 interface LoginTemplateVars {
   firstName: string;

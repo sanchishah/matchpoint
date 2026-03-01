@@ -1,6 +1,6 @@
 import { CONTACT_EMAIL } from "@/lib/constants";
 
-const SUPPORT_EMAIL = "support@matchpoint.app";
+const SUPPORT_EMAIL = "support@mymatchpoint.com";
 
 export function friendRequestEmailHtml(firstName: string, senderName: string): string {
   return `

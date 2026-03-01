@@ -4,6 +4,7 @@ import { sendEmail, reminderEmail, chatOpenEmail, shouldSendEmail } from "@/lib/
 import { sendPushToUser } from "@/lib/push";
 import { confirmGame } from "@/lib/game-service";
 import { distanceMiles } from "@/lib/constants";
+import { buildMatchmakingContext, scoreSlot } from "@/lib/matchmaking-scoring";
 import { availabilityMatchEmailHtml, availabilityMatchEmailText } from "@/lib/emails/availability-match";
 import { format } from "date-fns";
 
@@ -235,7 +236,7 @@ export async function POST() {
     results.push(`Auto-joined ${recurringJoins} recurring subscribers`);
   }
 
-  // 7. Availability match notifications
+  // 7. Availability match notifications (with AvailabilityMatch records)
   const activeWindows = await prisma.availabilityWindow.findMany({
     where: { active: true },
     include: {
@@ -243,9 +244,14 @@ export async function POST() {
     },
   });
 
+  // Build matchmaking contexts per user (deduplicated)
+  const contextCache = new Map<string, Awaited<ReturnType<typeof buildMatchmakingContext>>>();
+  const dateTo7d = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
   let availabilityNotifs = 0;
   for (const window of activeWindows) {
     if (!window.user.profile) continue;
+    if (!window.user.profile.lat || !window.user.profile.lng) continue;
 
     // Find OPEN/PENDING_FILL slots matching this window
     const matchingSlots = await prisma.slot.findMany({
@@ -260,7 +266,7 @@ export async function POST() {
       },
       include: {
         club: true,
-        participants: { where: { status: "JOINED" }, select: { id: true } },
+        participants: { where: { status: "JOINED" }, select: { userId: true } },
       },
     });
 
@@ -274,29 +280,76 @@ export async function POST() {
       if (slot.participants.length >= slot.requiredPlayers) continue;
 
       // Check distance
-      if (window.user.profile.lat && window.user.profile.lng) {
-        const dist = distanceMiles(
-          window.user.profile.lat,
-          window.user.profile.lng,
-          slot.club.lat,
-          slot.club.lng
+      const dist = distanceMiles(
+        window.user.profile.lat!,
+        window.user.profile.lng!,
+        slot.club.lat,
+        slot.club.lng
+      );
+      if (dist > window.user.profile.radiusMiles) continue;
+
+      // Dedup via AvailabilityMatch unique constraint
+      const existingMatch = await prisma.availabilityMatch.findUnique({
+        where: { userId_slotId: { userId: window.userId, slotId: slot.id } },
+      });
+      if (existingMatch) continue;
+
+      // Build context for scoring (cached per user)
+      if (!contextCache.has(window.userId)) {
+        contextCache.set(
+          window.userId,
+          await buildMatchmakingContext(window.userId, {
+            skillLevel: window.user.profile.skillLevel,
+            ageBracket: window.user.profile.ageBracket,
+            lat: window.user.profile.lat!,
+            lng: window.user.profile.lng!,
+            radiusMiles: window.user.profile.radiusMiles,
+          })
         );
-        if (dist > window.user.profile.radiusMiles) continue;
+      }
+      const ctx = contextCache.get(window.userId)!;
+
+      // Batch-fetch participant avg ratings
+      const participantUserIds = slot.participants.map((p) => p.userId);
+      const participantAvgRatings = new Map<string, number>();
+      if (participantUserIds.length > 0) {
+        const ratings = await prisma.rating.groupBy({
+          by: ["rateeId"],
+          where: { rateeId: { in: participantUserIds } },
+          _avg: { stars: true },
+        });
+        for (const r of ratings) {
+          if (r._avg.stars !== null) {
+            participantAvgRatings.set(r.rateeId, r._avg.stars);
+          }
+        }
       }
 
-      // Check not already notified for this slot
-      const alreadyNotified = await prisma.notification.findFirst({
-        where: {
+      const scoreResult = scoreSlot(
+        slot,
+        participantUserIds,
+        participantAvgRatings,
+        ctx,
+        now,
+        dateTo7d,
+        window.user.profile.radiusMiles
+      );
+
+      const qualityScore = scoreResult ? scoreResult.score : 0;
+
+      // Create AvailabilityMatch record
+      await prisma.availabilityMatch.create({
+        data: {
           userId: window.userId,
-          type: "AVAILABILITY_MATCH",
-          body: { contains: slot.id },
+          slotId: slot.id,
+          windowId: window.id,
+          qualityScore,
         },
       });
-      if (alreadyNotified) continue;
 
       const name = window.user.profile.name || window.user.name || "Player";
       const dateStr = format(slot.startTime, "EEEE, MMM d 'at' h:mm a");
-      const bookUrl = `${process.env.APP_BASE_URL || "http://localhost:3000"}/book?slot=${slot.id}`;
+      const bookUrl = `${process.env.APP_BASE_URL || "http://localhost:3000"}/dashboard/availability/matches`;
 
       await prisma.notification.create({
         data: {
@@ -319,7 +372,7 @@ export async function POST() {
       sendPushToUser(window.userId, {
         title: "Game matches your availability!",
         body: `${slot.club.name} on ${dateStr}`,
-        url: `/book?slot=${slot.id}`,
+        url: `/dashboard/availability/matches`,
       }).catch(() => {});
 
       availabilityNotifs++;
@@ -327,6 +380,18 @@ export async function POST() {
   }
   if (availabilityNotifs > 0) {
     results.push(`Sent ${availabilityNotifs} availability match notifications`);
+  }
+
+  // 8. Expire old availability matches (slot has already started)
+  const expiredMatches = await prisma.availabilityMatch.updateMany({
+    where: {
+      status: "PENDING",
+      slot: { startTime: { lt: now } },
+    },
+    data: { status: "EXPIRED" },
+  });
+  if (expiredMatches.count > 0) {
+    results.push(`Expired ${expiredMatches.count} availability matches`);
   }
 
   return NextResponse.json({

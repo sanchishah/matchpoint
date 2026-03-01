@@ -52,6 +52,7 @@ model User {
   friendshipsReceived   Friendship[] @relation("FriendshipsReceived")
   recurringSubscriptions RecurringSubscription[]
   availabilityWindows    AvailabilityWindow[]
+  availabilityMatches    AvailabilityMatch[]
 }
 
 model Account {
@@ -172,9 +173,10 @@ model Slot {
   updatedAt       DateTime   @updatedAt
 
   recurringGroupId String?    // links slots from the same recurring series
-  club         Club              @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  participants SlotParticipant[]
-  game         Game?
+  club                Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  participants        SlotParticipant[]
+  game                Game?
+  availabilityMatches AvailabilityMatch[]
 
   @@index([recurringGroupId])
 }
@@ -407,10 +409,32 @@ model AvailabilityWindow {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches AvailabilityMatch[]
 
   @@unique([userId, dayOfWeek, startHour, endHour])
   @@index([dayOfWeek, active])
+}
+
+// ─── Availability Matches ────────────────────────────
+
+model AvailabilityMatch {
+  id            String                  @id @default(cuid())
+  userId        String
+  slotId        String
+  windowId      String
+  qualityScore  Float
+  status        AvailabilityMatchStatus @default(PENDING)
+  notifiedAt    DateTime                @default(now())
+  joinedAt      DateTime?
+  dismissedAt   DateTime?
+
+  user   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot   Slot               @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  window AvailabilityWindow @relation(fields: [windowId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slotId])
+  @@index([userId, status])
 }
 
 // ─── Enums ──────────────────────────────────────────
@@ -485,6 +509,13 @@ enum FriendshipStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+enum AvailabilityMatchStatus {
+  PENDING
+  JOINED
+  DISMISSED
+  EXPIRED
 }
 
 // ─── Friendships ─────────────────────────────────────

@@ -9,7 +9,7 @@
  *
  * Required env vars:
  *   RESEND_API_KEY   – Resend API key (required when using Resend)
- *   EMAIL_FROM       – Sender address, e.g. "Matchpoint <noreply@matchpoint.app>"
+ *   EMAIL_FROM       – Sender address, e.g. "Matchpoint <noreply@mymatchpoint.com>"
  *   EMAIL_PROVIDER   – (optional) "resend" | "sendgrid" | "ses". Defaults to "resend".
  *
  * To add SendGrid:
@@ -112,7 +112,7 @@ function createProvider(): EmailProvider {
 }
 
 const emailProvider = createProvider();
-const from = process.env.EMAIL_FROM || "Matchpoint <noreply@matchpoint.app>";
+const from = process.env.EMAIL_FROM || "Matchpoint <noreply@mymatchpoint.com>";
 
 // ── Public API ───────────────────────────────────────────
 
@@ -158,7 +158,7 @@ export function gameConfirmedEmail(playerName: string, clubName: string, dateStr
         <p style="color: #333333;">Chat opens 15 minutes before your game. See you on the court!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
+        <p style="color: #94A3B8; font-size: 11px;">support@mymatchpoint.com &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -175,7 +175,7 @@ export function spotReservedEmail(playerName: string, clubName: string, dateStr:
         <p style="color: #333333;">We're waiting for more players to fill the game. You'll only be charged once confirmed.</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
+        <p style="color: #94A3B8; font-size: 11px;">support@mymatchpoint.com &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -192,7 +192,7 @@ export function reminderEmail(playerName: string, clubName: string, dateStr: str
         <p style="color: #333333;">Get ready to play!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
+        <p style="color: #94A3B8; font-size: 11px;">support@mymatchpoint.com &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };
@@ -208,7 +208,7 @@ export function chatOpenEmail(playerName: string, clubName: string) {
         <p style="color: #333333;">The game chat for your match at <strong>${clubName}</strong> is now open. Coordinate with your fellow players!</p>
         <p style="color: #64748B; font-size: 13px; margin-top: 30px;">Matchpoint &mdash; Where players meet their match.</p>
         <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-        <p style="color: #94A3B8; font-size: 11px;">support@matchpoint.app &middot; Contact: ${CONTACT_EMAIL}</p>
+        <p style="color: #94A3B8; font-size: 11px;">support@mymatchpoint.com &middot; Contact: ${CONTACT_EMAIL}</p>
       </div>
     `,
   };

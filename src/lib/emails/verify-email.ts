@@ -6,7 +6,7 @@
 
 import { CONTACT_EMAIL } from "@/lib/constants";
 
-const SUPPORT_EMAIL = "support@matchpoint.app";
+const SUPPORT_EMAIL = "support@mymatchpoint.com";
 
 interface VerifyEmailTemplateVars {
   firstName: string;

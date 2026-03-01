@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             <h2 className="font-[family-name:var(--font-heading)] text-xl text-[#0A0A0A] mb-3">6. Contact</h2>
             <p className="leading-relaxed">
               For privacy-related inquiries, please reach out through our Contact page or email us at
-              privacy@matchpoint.app.
+              privacy@mymatchpoint.com.
             </p>
           </section>
         </div>

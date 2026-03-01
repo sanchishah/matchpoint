@@ -4,7 +4,7 @@
  * Placeholders resolved at render time:
  *   {{first_name}}      – user's first name (parsed from full name)
  *   {{profile_url}}     – link to profile/onboarding page
- *   {{support_email}}   – support@matchpoint.app
+ *   {{support_email}}   – support@mymatchpoint.com
  *   {{company_address}} – physical mailing address (CAN-SPAM)
  *   {{unsubscribe_url}} – notification preferences / unsubscribe link
  */
@@ -23,7 +23,7 @@ export const DEFAULT_WELCOME_SUBJECT = WELCOME_SUBJECTS[0];
 
 import { CONTACT_EMAIL } from "@/lib/constants";
 
-const SUPPORT_EMAIL = "support@matchpoint.app";
+const SUPPORT_EMAIL = "support@mymatchpoint.com";
 
 interface WelcomeTemplateVars {
   firstName: string;

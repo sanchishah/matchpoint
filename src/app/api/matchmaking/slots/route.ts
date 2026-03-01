@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { distanceMiles, skillLabel, ageBracketLabel } from "@/lib/constants";
+import { buildMatchmakingContext, scoreSlot } from "@/lib/matchmaking-scoring";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -37,54 +37,63 @@ export async function GET(req: Request) {
       ? radiusMilesParam
       : profile.radiusMiles;
 
-  const slots = await prisma.slot.findMany({
-    where: {
-      status: { in: ["OPEN", "PENDING_FILL"] },
-      startTime: { gte: dateFrom, lte: dateTo },
-      lockTime: { gt: now },
-    },
-    include: {
-      club: true,
-      _count: { select: { participants: { where: { status: "JOINED" } } } },
-    },
-  });
+  const [slots, context] = await Promise.all([
+    prisma.slot.findMany({
+      where: {
+        status: { in: ["OPEN", "PENDING_FILL"] },
+        startTime: { gte: dateFrom, lte: dateTo },
+        lockTime: { gt: now },
+      },
+      include: {
+        club: true,
+        participants: {
+          where: { status: "JOINED" },
+          select: { userId: true },
+        },
+      },
+    }),
+    buildMatchmakingContext(session.user.id, {
+      skillLevel: profile.skillLevel,
+      ageBracket: profile.ageBracket,
+      lat: profile.lat,
+      lng: profile.lng,
+      radiusMiles: profile.radiusMiles,
+    }),
+  ]);
 
-  // Filter by distance and score
+  // Batch-fetch avg ratings for all participant userIds
+  const allParticipantIds = [
+    ...new Set(slots.flatMap((s) => s.participants.map((p) => p.userId))),
+  ];
+  const participantAvgRatings = new Map<string, number>();
+
+  if (allParticipantIds.length > 0) {
+    const ratings = await prisma.rating.groupBy({
+      by: ["rateeId"],
+      where: { rateeId: { in: allParticipantIds } },
+      _avg: { stars: true },
+    });
+    for (const r of ratings) {
+      if (r._avg.stars !== null) {
+        participantAvgRatings.set(r.rateeId, r._avg.stars);
+      }
+    }
+  }
+
   const scored = slots
     .map((slot) => {
-      const dist = distanceMiles(
-        profile.lat!,
-        profile.lng!,
-        slot.club.lat,
-        slot.club.lng
+      const participantUserIds = slot.participants.map((p) => p.userId);
+      const result = scoreSlot(
+        slot,
+        participantUserIds,
+        participantAvgRatings,
+        context,
+        now,
+        dateTo,
+        effectiveRadius
       );
-      if (dist > effectiveRadius) return null;
 
-      let score = 0;
-      const reasons: string[] = [];
-
-      // Skill match: +40
-      if (slot.skillLevel === profile.skillLevel) {
-        score += 40;
-        reasons.push(`Skill match (${skillLabel(slot.skillLevel)})`);
-      }
-
-      // Age bracket match: +30
-      if (slot.ageBracket === profile.ageBracket) {
-        score += 30;
-        reasons.push(`Age bracket match (${ageBracketLabel(slot.ageBracket)})`);
-      }
-
-      // Distance score: (1 - dist/radius) * 20
-      const distScore = (1 - dist / effectiveRadius) * 20;
-      score += distScore;
-      reasons.push(`Within ${dist.toFixed(1)} miles`);
-
-      // Time score: closer to now gets more points (up to 10)
-      const msUntilStart = slot.startTime.getTime() - now.getTime();
-      const maxMs = dateTo.getTime() - now.getTime();
-      const timeScore = maxMs > 0 ? (1 - msUntilStart / maxMs) * 10 : 0;
-      score += Math.max(timeScore, 0);
+      if (!result) return null;
 
       return {
         slot: {
@@ -100,11 +109,12 @@ export async function GET(req: Request) {
           ageBracket: slot.ageBracket,
           status: slot.status,
           lockTime: slot.lockTime,
-          joinedCount: slot._count.participants,
+          joinedCount: participantUserIds.length,
         },
-        score: Math.round(score * 10) / 10,
-        reasons,
-        distance: Math.round(dist * 10) / 10,
+        score: result.score,
+        reasons: result.reasons,
+        distance: result.distance,
+        friendsInSlot: result.friendsInSlot,
       };
     })
     .filter(Boolean) as Array<{
@@ -112,6 +122,7 @@ export async function GET(req: Request) {
       score: number;
       reasons: string[];
       distance: number;
+      friendsInSlot: number;
     }>;
 
   scored.sort((a, b) => b.score - a.score);

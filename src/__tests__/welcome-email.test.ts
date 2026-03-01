@@ -35,8 +35,8 @@ const { sendWelcomeEmail } = await import("@/lib/welcome-email");
 
 const templateVars = {
   firstName: "Sanchi",
-  profileUrl: "https://matchpoint.app/profile/setup",
-  unsubscribeUrl: "https://matchpoint.app/profile/setup",
+  profileUrl: "https://mymatchpoint.com/profile/setup",
+  unsubscribeUrl: "https://mymatchpoint.com/profile/setup",
 };
 
 // ─────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ describe("Welcome email templates", () => {
     });
 
     it("contains the CTA profile link", () => {
-      expect(html).toContain('href="https://matchpoint.app/profile/setup"');
+      expect(html).toContain('href="https://mymatchpoint.com/profile/setup"');
     });
 
     it("contains CTA button text", () => {
@@ -73,11 +73,11 @@ describe("Welcome email templates", () => {
 
     it("contains the unsubscribe link", () => {
       expect(html).toContain("Manage notification preferences");
-      expect(html).toContain("https://matchpoint.app/profile/setup");
+      expect(html).toContain("https://mymatchpoint.com/profile/setup");
     });
 
     it("contains support email", () => {
-      expect(html).toContain("support@matchpoint.app");
+      expect(html).toContain("support@mymatchpoint.com");
     });
 
     it("contains company address placeholder", () => {
@@ -93,7 +93,7 @@ describe("Welcome email templates", () => {
     });
 
     it("contains the profile URL on its own", () => {
-      expect(text).toContain("https://matchpoint.app/profile/setup");
+      expect(text).toContain("https://mymatchpoint.com/profile/setup");
     });
 
     it("contains key email copy lines", () => {
