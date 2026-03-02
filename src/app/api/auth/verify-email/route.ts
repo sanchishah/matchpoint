@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+const BASE_URL = process.env.APP_BASE_URL || "https://www.mymatchpoint.com";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
     if (!token) {
-      return NextResponse.redirect(
-        new URL("/login?error=missing-token", req.url)
-      );
+      return NextResponse.redirect(`${BASE_URL}/login?error=missing-token`);
     }
 
     // Look up the verification token
@@ -18,9 +18,7 @@ export async function GET(req: Request) {
     });
 
     if (!verificationToken) {
-      return NextResponse.redirect(
-        new URL("/login?error=invalid-token", req.url)
-      );
+      return NextResponse.redirect(`${BASE_URL}/login?error=invalid-token`);
     }
 
     // Check expiry
@@ -35,9 +33,7 @@ export async function GET(req: Request) {
         },
       });
 
-      return NextResponse.redirect(
-        new URL("/login?error=expired-token", req.url)
-      );
+      return NextResponse.redirect(`${BASE_URL}/login?error=expired-token`);
     }
 
     // Mark the user's email as verified
@@ -56,11 +52,11 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/login?verified=true", req.url));
+    return NextResponse.redirect(`${BASE_URL}/login?verified=true`);
   } catch (error) {
     console.error("[verify-email] Error:", error);
     return NextResponse.redirect(
-      new URL("/login?error=verification-failed", req.url)
+      `${BASE_URL}/login?error=verification-failed`
     );
   }
 }
