@@ -251,7 +251,7 @@ export default function BookPage() {
         <h1 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#0A0A0A] mb-3 tracking-wide">
           Reserve Your Court & Rally!
         </h1>
-        <p className="text-[#64748B] mb-8 max-w-xl">
+        <p className="text-[#64748B] mb-8 whitespace-nowrap">
           Browse available courts in the South Bay. You&apos;re only charged when a game is confirmed.
         </p>
 
