@@ -80,8 +80,8 @@ describe("Welcome email templates", () => {
       expect(html).toContain("support@mymatchpoint.com");
     });
 
-    it("contains company address placeholder", () => {
-      expect(html).toContain("South Bay, CA");
+    it("contains contact email", () => {
+      expect(html).toContain("contactmymatchpoint@gmail.com");
     });
   });
 

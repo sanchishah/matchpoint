@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { sendLoginEmail } from "@/lib/login-email";
+import { sendWelcomeEmail } from "@/lib/welcome-email";
 import { ADMIN_EMAILS } from "@/lib/constants";
 
 const loginSchema = z.object({
@@ -61,10 +62,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user }) {
       if (user.id) {
         // Fire-and-forget — never block the login flow.
-        sendLoginEmail(user.id).catch(() => {
-          // Errors already logged inside sendLoginEmail; this catch
-          // prevents an unhandled rejection.
-        });
+        sendLoginEmail(user.id).catch(() => {});
+      }
+    },
+    async createUser({ user }) {
+      if (user.id) {
+        // OAuth signups go through PrismaAdapter which triggers this event.
+        // Credentials signups already call sendWelcomeEmail in the signup route,
+        // but the idempotency guard in sendWelcomeEmail prevents duplicates.
+        sendWelcomeEmail(user.id).catch(() => {});
       }
     },
   },
