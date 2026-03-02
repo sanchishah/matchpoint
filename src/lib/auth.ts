@@ -59,8 +59,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   events: {
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (user.id) {
+        // Auto-verify email for OAuth providers (e.g. Google) since they
+        // only return verified emails. Without this, OAuth users get blocked
+        // from joining games with "Please verify your email".
+        if (account?.provider && account.provider !== "credentials") {
+          await prisma.user.updateMany({
+            where: { id: user.id, emailVerified: null },
+            data: { emailVerified: new Date() },
+          });
+        }
         // Fire-and-forget — never block the login flow.
         sendLoginEmail(user.id).catch(() => {});
       }
