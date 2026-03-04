@@ -10,20 +10,32 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [profile, strikeCount] = await Promise.all([
+  const [profile, strikeCount, user, joinedCount] = await Promise.all([
     prisma.profile.findUnique({
       where: { userId: session.user.id },
     }),
     prisma.strike.count({
       where: { userId: session.user.id },
     }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailVerified: true },
+    }),
+    prisma.slotParticipant.count({
+      where: { userId: session.user.id, status: "JOINED" },
+    }),
   ]);
 
+  const onboarding = {
+    emailVerified: !!user?.emailVerified,
+    hasJoinedSlot: joinedCount > 0,
+  };
+
   if (!profile) {
-    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    return NextResponse.json({ error: "Profile not found", ...onboarding }, { status: 404 });
   }
 
-  return NextResponse.json({ ...profile, strikeCount });
+  return NextResponse.json({ ...profile, strikeCount, ...onboarding });
 }
 
 export async function POST(request: Request) {

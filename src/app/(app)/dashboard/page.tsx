@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePushNotifications } from "@/lib/use-push";
 import { DotLoader } from "@/components/dot-loader";
+import { OnboardingChecklist } from "@/components/onboarding-checklist";
 
 interface ProfileData {
   name: string;
@@ -48,6 +49,14 @@ export default function DashboardPage() {
   const [games, setGames] = useState<GameData[]>([]);
   const [friendGames, setFriendGames] = useState<FriendGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [onboarding, setOnboarding] = useState<{ emailVerified: boolean; hasProfile: boolean; hasJoinedSlot: boolean } | null>(null);
+  const [checklistDismissed, setChecklistDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("onboarding-dismissed") === "true" ||
+        Object.keys(localStorage).some((k) => k.startsWith("onboarding-dismissed-") && localStorage.getItem(k) === "true");
+    } catch { return false; }
+  });
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
 
   useEffect(() => {
@@ -67,10 +76,15 @@ export default function DashboardPage() {
           fetch("/api/friends/games"),
         ]);
 
+        const profileBody = await profileRes.json();
         if (profileRes.ok) {
-          const p = await profileRes.json();
-          setProfile(p);
+          setProfile(profileBody);
         }
+        setOnboarding({
+          emailVerified: !!profileBody.emailVerified,
+          hasProfile: profileRes.ok,
+          hasJoinedSlot: !!profileBody.hasJoinedSlot,
+        });
 
         if (gamesRes.ok) {
           const g = await gamesRes.json();
@@ -101,6 +115,21 @@ export default function DashboardPage() {
         <h1 className="font-[family-name:var(--font-heading)] text-3xl text-[#0A0A0A] mb-8 tracking-wide">
           Welcome back{profile ? `, ${profile.name}` : ""}
         </h1>
+
+        {onboarding && !checklistDismissed && (
+          <OnboardingChecklist
+            emailVerified={onboarding.emailVerified}
+            hasProfile={onboarding.hasProfile}
+            hasJoinedSlot={onboarding.hasJoinedSlot}
+            onDismiss={() => {
+              setChecklistDismissed(true);
+              try {
+                const uid = session?.user?.id;
+                localStorage.setItem(uid ? `onboarding-dismissed-${uid}` : "onboarding-dismissed", "true");
+              } catch {}
+            }}
+          />
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {/* Profile Card */}
