@@ -88,6 +88,23 @@ export default function BookPage() {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [friendsPlaying, setFriendsPlaying] = useState(false);
   const [subscribing, setSubscribing] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Pre-fill zip and radius from user's profile
+  useEffect(() => {
+    if (!session) {
+      setProfileLoaded(true);
+      return;
+    }
+    fetch("/api/profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.zip) setZip(data.zip);
+        if (data?.radiusMiles) setRadius(String(data.radiusMiles));
+      })
+      .catch(() => {})
+      .finally(() => setProfileLoaded(true));
+  }, [session]);
 
   const fetchSlots = useCallback(async () => {
     setLoading(true);
@@ -123,8 +140,9 @@ export default function BookPage() {
   }, [session]);
 
   useEffect(() => {
+    if (!profileLoaded) return;
     fetchSlots();
-  }, [fetchSlots]);
+  }, [profileLoaded, fetchSlots]);
 
   useEffect(() => {
     fetchFavorites();
