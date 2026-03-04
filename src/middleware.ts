@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authMiddleware } from "@/lib/auth.edge";
 
-const protectedPaths = ["/dashboard", "/games", "/book", "/profile", "/admin"];
+const protectedPaths = ["/dashboard", "/games", "/book", "/profile", "/admin", "/club-admin"];
 const authPaths = ["/login", "/signup"];
 
 export default authMiddleware((req) => {
@@ -36,6 +36,7 @@ export const config = {
     "/book/:path*",
     "/profile/:path*",
     "/admin/:path*",
+    "/club-admin/:path*",
     "/login",
     "/signup",
   ],

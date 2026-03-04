@@ -53,6 +53,7 @@ model User {
   recurringSubscriptions RecurringSubscription[]
   availabilityWindows    AvailabilityWindow[]
   availabilityMatches    AvailabilityMatch[]
+  clubAdmins             ClubAdmin[]
 }
 
 model Account {
@@ -140,6 +141,20 @@ model Club {
 
   slots         Slot[]
   favoriteClubs FavoriteClub[]
+  clubAdmins    ClubAdmin[]
+}
+
+model ClubAdmin {
+  id        String   @id @default(cuid())
+  userId    String
+  clubId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clubId])
+  @@index([userId])
 }
 
 model FavoriteClub {
