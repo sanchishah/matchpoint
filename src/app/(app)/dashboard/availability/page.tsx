@@ -8,6 +8,7 @@ import { Clock, Plus, Trash2, Sparkles, ChevronRight, Lightbulb } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { DotLoader } from "@/components/dot-loader";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -152,11 +153,7 @@ export default function AvailabilityPage() {
   };
 
   if (authStatus === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   // Group windows by day

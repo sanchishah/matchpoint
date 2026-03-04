@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DotLoader } from "@/components/dot-loader";
 
 interface ReferralData {
   refereeEmail: string;
@@ -74,11 +75,7 @@ export default function ReferralsPage() {
   );
 
   if (status === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   return (

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePushNotifications } from "@/lib/use-push";
+import { DotLoader } from "@/components/dot-loader";
 
 interface ProfileData {
   name: string;
@@ -88,11 +89,7 @@ export default function DashboardPage() {
   }, [session]);
 
   if (status === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   const upcomingGames = games.filter((g) => new Date(g.startTime) > new Date());

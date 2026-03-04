@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { DotLoaderInline } from "@/components/dot-loader";
 import {
   Select,
   SelectContent,
@@ -513,7 +514,7 @@ export default function BookPage() {
 
         {/* Slots Grid / Map */}
         {loading ? (
-          <div className="text-center py-20 text-[#64748B]">Loading available courts...</div>
+          <DotLoaderInline message="Finding courts" />
         ) : sortedSlots.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-[#64748B] mb-4">No slots match your filters.</p>

@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { DotLoader } from "@/components/dot-loader";
 import { SKILL_LEVELS, AGE_BRACKETS } from "@/lib/constants";
 
 interface ClubData {
@@ -85,11 +86,7 @@ export default function ClubPage({ params }: { params: Promise<{ id: string }> }
     AGE_BRACKETS.find((a) => a.value === bracket)?.label || bracket;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   if (!club) {

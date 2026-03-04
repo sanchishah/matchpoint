@@ -88,6 +88,11 @@
   --sidebar-ring: #0B4F6C;
 }
 
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-8px); opacity: 1; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

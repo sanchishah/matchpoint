@@ -8,6 +8,7 @@ import { Users, UserCheck, UserPlus, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DotLoader } from "@/components/dot-loader";
 import { toast } from "sonner";
 import { skillLabel } from "@/lib/constants";
 
@@ -104,11 +105,7 @@ export default function FriendsPage() {
   };
 
   if (authStatus === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   const tabs: { key: Tab; label: string; count: number }[] = [

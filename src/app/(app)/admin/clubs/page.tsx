@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, MapPin } from "lucide-react";
+import { DotLoader } from "@/components/dot-loader";
 
 interface Club {
   id: string;
@@ -90,7 +91,7 @@ export default function AdminClubsPage() {
     setDialogOpen(true);
   };
 
-  if (loading) return <p className="text-[#64748B]">Loading clubs...</p>;
+  if (loading) return <DotLoader />;
 
   return (
     <div>

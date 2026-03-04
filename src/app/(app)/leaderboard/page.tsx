@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Trophy, Star, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DotLoaderInline } from "@/components/dot-loader";
 
 type Tab = "games" | "rating" | "streak";
 
@@ -70,7 +71,7 @@ export default function LeaderboardPage() {
 
         {/* Table */}
         {loading ? (
-          <div className="text-center py-20 text-[#64748B]">Loading...</div>
+          <DotLoaderInline />
         ) : entries.length === 0 ? (
           <div className="text-center py-20 text-[#64748B]">
             No data yet. Play some games to appear on the leaderboard!

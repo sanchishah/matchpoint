@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { DotLoader } from "@/components/dot-loader";
 
 interface EmailPreferences {
   gameConfirmations: boolean;
@@ -74,11 +75,7 @@ export default function SettingsPage() {
   };
 
   if (authStatus === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   return (

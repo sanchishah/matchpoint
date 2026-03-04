@@ -8,6 +8,7 @@ import { Heart, Users, Clock, MapPin, Repeat, Download, UserCheck } from "lucide
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DotLoaderInline } from "@/components/dot-loader";
 import { toast } from "sonner";
 import { SKILL_LEVELS, AGE_BRACKETS } from "@/lib/constants";
 
@@ -200,7 +201,7 @@ export default function LosGatosClient() {
 
         {/* Slots Grid */}
         {loading ? (
-          <div className="text-center py-20 text-[#64748B]">Loading available courts...</div>
+          <DotLoaderInline message="Finding courts" />
         ) : slots.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-[#64748B] mb-4">No courts available right now.</p>

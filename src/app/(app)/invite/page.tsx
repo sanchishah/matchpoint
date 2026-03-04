@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DotLoader } from "@/components/dot-loader";
 
 interface ClubInfo {
   name: string;
@@ -32,11 +33,7 @@ function InviteContent() {
   }, [clubSlug]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   return (
@@ -84,11 +81,7 @@ function InviteContent() {
 export default function InvitePage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-[#64748B]">Loading...</p>
-        </div>
-      }
+      fallback={<DotLoader />}
     >
       <InviteContent />
     </Suspense>

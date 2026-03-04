@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { CreditCard } from "lucide-react";
+import { DotLoader, DotLoaderInline } from "@/components/dot-loader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -59,11 +60,7 @@ export default function PaymentsPage() {
   }, [statusFilter]);
 
   if (authStatus === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   return (
@@ -98,7 +95,7 @@ export default function PaymentsPage() {
 
         {/* Table */}
         {loading ? (
-          <div className="text-center py-20 text-[#64748B]">Loading...</div>
+          <DotLoaderInline />
         ) : payments.length === 0 ? (
           <Card className="border-[#E2E8F0] rounded-xl p-8 text-center">
             <p className="text-[#64748B]">No payments found.</p>

@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { Sparkles, Clock, MapPin, Users, ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DotLoader } from "@/components/dot-loader";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { SKILL_LEVELS, AGE_BRACKETS } from "@/lib/constants";
@@ -105,11 +106,7 @@ export default function AvailabilityMatchesPage() {
   };
 
   if (authStatus === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[#64748B]">Loading...</p>
-      </div>
-    );
+    return <DotLoader />;
   }
 
   return (

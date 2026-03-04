@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DotLoader } from "@/components/dot-loader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, X, Calendar } from "lucide-react";
@@ -92,7 +93,7 @@ export default function AdminSlotsPage() {
     }
   };
 
-  if (loading) return <p className="text-[#64748B]">Loading slots...</p>;
+  if (loading) return <DotLoader />;
 
   return (
     <div>
